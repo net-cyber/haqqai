@@ -33,7 +33,18 @@ map $http_upgrade $connection_upgrade {
 server {
     listen 80 default_server;
     server_name haqqai.lambadinaai.com;
-    return 301 https://$host$request_uri;
+
+    # Health probe must be reachable over plain HTTP so the container
+    # healthcheck (which hits http://127.0.0.1/nginx-health) doesn't
+    # get caught by the redirect and return a 301.
+    location = /nginx-health {
+        access_log off;
+        return 200 "ok\n";
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
 }
 
 # HTTPS server
