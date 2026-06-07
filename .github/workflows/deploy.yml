@@ -30,6 +30,8 @@ jobs:
           push: true
           tags: devnatnaels/haqqai-backend:latest
           platforms: linux/arm64
+          cache-from: type=registry,ref=devnatnaels/haqqai-backend:cache
+          cache-to: type=registry,ref=devnatnaels/haqqai-backend:cache,mode=max
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
@@ -39,6 +41,8 @@ jobs:
           push: true
           tags: devnatnaels/haqqai-web:latest
           platforms: linux/arm64
+          cache-from: type=registry,ref=devnatnaels/haqqai-web:cache
+          cache-to: type=registry,ref=devnatnaels/haqqai-web:cache,mode=max
 
   deploy:
     needs: build-and-push
@@ -48,13 +52,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Copy docker-compose to server
+      - name: Copy deployment files to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.ORACLE_HOST }}
           username: ${{ secrets.ORACLE_USER }}
           key: ${{ secrets.ORACLE_SSH_KEY }}
-          source: "deployment/docker_compose/"
+          source: "deployment/"
           target: "/home/ubuntu/haqqai"
 
       - name: Deploy on Oracle server
@@ -64,6 +68,9 @@ jobs:
           username: ${{ secrets.ORACLE_USER }}
           key: ${{ secrets.ORACLE_SSH_KEY }}
           script: |
+            # Fix permissions
+            sudo chown -R ubuntu:ubuntu /home/ubuntu/haqqai/
+
             cd /home/ubuntu/haqqai/deployment/docker_compose
 
             # Create .env if it doesn't exist
@@ -71,9 +78,11 @@ jobs:
               cp env.template .env 2>/dev/null || touch .env
             fi
 
-            # Set custom image overrides
-            export CUSTOM_BACKEND_IMAGE=devnatnaels/haqqai-backend:latest
-            export CUSTOM_WEB_IMAGE=devnatnaels/haqqai-web:latest
+            # Fix web_server health check dependency for nginx
+            sed -i 's/condition: service_healthy$/condition: service_started/' docker-compose.yml
+
+            # Ensure nginx config files are executable
+            chmod +x /home/ubuntu/haqqai/deployment/data/nginx/run-nginx.sh
 
             # Pull latest images
             docker compose pull
