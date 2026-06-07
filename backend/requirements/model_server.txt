@@ -1594,11 +1594,21 @@ transformers==4.57.6 \
     --hash=sha256:4c9e9de11333ddfe5114bc872c9f370509198acf0b87a832a0ab9458e2bd0550 \
     --hash=sha256:55e44126ece9dc0a291521b7e5492b572e6ef2766338a610b9ab5afbb70689d3
     # via sentence-transformers
-triton==3.5.1 ; platform_machine == 'x86_64' and sys_platform == 'linux' \
-    --hash=sha256:0b4d2c70127fca6a23e247f9348b8adde979d2e7a20391bfbabaac6aebc7e6a8 \
-    --hash=sha256:bac7f7d959ad0f48c0e97d6643a1cc0fd5786fe61cb1f83b537c6b2d54776478 \
-    --hash=sha256:d0637b1efb1db599a8e9dc960d53ab6e4637db7d4ab6630a0974705d77b14b60 \
-    --hash=sha256:f3f4346b6ebbd4fad18773f5ba839114f4826037c9f2f34e0148894cd5dd3dba
+triton==3.7.0 ; platform_machine == 'x86_64' and sys_platform == 'linux' \
+    --hash=sha256:18a160de426fd99f92b0baf509045360afbd3bfaa0b4a5171dde800ec9f09684 \
+    --hash=sha256:223ac302091491436c248a34ee1e6c47a1026486579103c906ffd805be50cb89 \
+    --hash=sha256:22bacffce443f54593dd20f05294d5a40622e0ea9ab632816f87154504356221 \
+    --hash=sha256:70fb9bbdc9f400afc54bbf6eb2670af28829a6ae3996863317964783141daf56 \
+    --hash=sha256:8f111161d49bf903c0eaedde3962353a3d841c08a836839b7cc1025b8426efcf \
+    --hash=sha256:a35d7afe3f3f058e7ec49fcce09794049e0ffc5c59019ac25ec3413741b8c4e7 \
+    --hash=sha256:a4bf49b00a7a377a68a6da603a876e797614e6455a80e9021669c476a953ad9a \
+    --hash=sha256:a9e71fc392675fac364e0ecf4ef3f76f85b7f5433a16f4c3c5fe5f05a52c85fe \
+    --hash=sha256:abdf6beaa89b1bcfb9a43cd990536ce66091a997841a4814b260b7bee4c88c3c \
+    --hash=sha256:b9b85e72968a9d8bba5ddb24e9b64aaabaf48affb042f2755cb7cfa92b7531ce \
+    --hash=sha256:c4a44a8476d0d3571eac4e4d1048e1ff75aad81a09ff4602ccfc56c6dea1672e \
+    --hash=sha256:c631b65668d4951213b948a413c0564184305b77bb45cc9d686d3e1ecc4701a3 \
+    --hash=sha256:cc1d61c172d257db80ddf42595131fb196ad2e9bdd751e90fe2ef13531734e8b \
+    --hash=sha256:ce061073102714b725f3660ec6939d94a1da7984b3aa99c921417cae273672f5
     # via torch
 types-requests==2.32.0.20250328 \
     --hash=sha256:72ff80f84b15eb3aa7a8e2625fffb6a93f2ad5a0c20215fc1dcfa61117bcb2a2 \
