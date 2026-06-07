@@ -29,8 +29,22 @@ map $http_upgrade $connection_upgrade {
     ''      close;
 }
 
+# Redirect HTTP to HTTPS
 server {
     listen 80 default_server;
+    server_name haqqai.lambadinaai.com;
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS server
+server {
+    listen 443 ssl default_server;
+    server_name haqqai.lambadinaai.com;
+
+    ssl_certificate     /etc/letsencrypt/live/haqqai.lambadinaai.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/haqqai.lambadinaai.com/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
 
     client_max_body_size 5G;    # Maximum upload size
 
@@ -49,7 +63,6 @@ server {
     location ~ ^/scim(/.*)?$ {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        # don't trust client-supplied X-Forwarded-* headers — use nginx's own values
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
@@ -71,7 +84,6 @@ server {
         # misc headers
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        # don't trust client-supplied X-Forwarded-* headers — use nginx's own values
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
@@ -98,7 +110,6 @@ server {
         # misc headers
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        # don't trust client-supplied X-Forwarded-* headers — use nginx's own values
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
@@ -116,45 +127,4 @@ server {
         proxy_redirect off;
         proxy_pass http://web_server;
     }
-
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-}
-
-server {
-    listen 443 ssl default_server;
-
-    client_max_body_size 5G;    # Maximum upload size
-
-    location / {
-        # misc headers
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        # don't use forwarded schema, host, or port here - this is the entry point
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-Host $host;
-        proxy_set_header X-Forwarded-Port $server_port;
-        proxy_set_header Host $host;
-
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection $connection_upgrade;
-        proxy_buffering off;
-
-        # timeout settings
-        proxy_connect_timeout ${NGINX_PROXY_CONNECT_TIMEOUT}s;
-        proxy_send_timeout ${NGINX_PROXY_SEND_TIMEOUT}s;
-        proxy_read_timeout ${NGINX_PROXY_READ_TIMEOUT}s;
-
-        # we don't want nginx trying to do something clever with
-        # redirects, we set the Host: header above already.
-        proxy_redirect off;
-        proxy_pass http://localhost:80;
-    }
-
-    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
-    include /etc/letsencrypt/options-ssl-nginx.conf;
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 }

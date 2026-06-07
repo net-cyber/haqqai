@@ -79,16 +79,16 @@ jobs:
             fi
 
             # Fix web_server health check dependency for nginx
-            sed -i 's/condition: service_healthy$/condition: service_started/' docker-compose.yml
+            sed -i 's/condition: service_healthy$/condition: service_started/' docker-compose.prod.yml
 
             # Ensure nginx config files are executable
             chmod +x /home/ubuntu/haqqai/deployment/data/nginx/run-nginx.sh
 
             # Pull latest images
-            docker compose pull
+            docker compose -f docker-compose.prod.yml pull
 
             # Restart with new images
-            docker compose up -d --force-recreate
+            docker compose -f docker-compose.prod.yml up -d --force-recreate
 
             # Clean up old images
             docker image prune -f

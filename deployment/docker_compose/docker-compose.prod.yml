@@ -306,8 +306,9 @@ services:
       - "443:443"
     volumes:
       - ../data/nginx:/nginx-templates:ro
-      - ../data/certbot/conf:/etc/letsencrypt
-      - ../data/certbot/www:/var/www/certbot
+      # SSL certificates — managed by certbot on the host via `certbot certonly --standalone`
+      # The host path /etc/letsencrypt is used directly (not the certbot container path)
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     logging:
       driver: json-file
       options:
@@ -319,9 +320,8 @@ services:
       && sed 's/\r$//' /etc/nginx/conf.d/run-nginx.sh > /tmp/run-nginx.sh
       && chmod +x /tmp/run-nginx.sh
       && /tmp/run-nginx.sh app.conf.template.prod"
-    env_file:
-      - .env.nginx
     environment:
+      - DOMAIN=haqqai.lambadinaai.com
       # Nginx proxy timeout settings (in seconds)
       - NGINX_PROXY_CONNECT_TIMEOUT=${NGINX_PROXY_CONNECT_TIMEOUT:-300}
       - NGINX_PROXY_SEND_TIMEOUT=${NGINX_PROXY_SEND_TIMEOUT:-300}
@@ -340,20 +340,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-
-  # follows https://pentacent.medium.com/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71
-  certbot:
-    image: certbot/certbot
-    restart: unless-stopped
-    volumes:
-      - ../data/certbot/conf:/etc/letsencrypt
-      - ../data/certbot/www:/var/www/certbot
-    logging:
-      driver: json-file
-      options:
-        max-size: "50m"
-        max-file: "6"
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
   minio:
     image: minio/minio:RELEASE.2025-07-23T15-54-02Z-cpuv1
