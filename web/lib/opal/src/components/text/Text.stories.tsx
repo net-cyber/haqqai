@@ -203,13 +203,13 @@ export const MarkdownCode: Story = {
   ),
 };
 
-export const MarkdownLink: Story = {
-  render: () => (
-    <Text font="main-ui-body" color="text-05">
-      {markdown("Visit [Onyx](https://www.onyx.app/) for more info")}
-    </Text>
-  ),
-};
+// export const MarkdownLink: Story = {
+//   render: () => (
+//     <Text font="main-ui-body" color="text-05">
+//       {markdown("Visit [Onyx](https://www.onyx.app/) for more info")}
+//     </Text>
+//   ),
+// };
 
 export const MarkdownStrikethrough: Story = {
   render: () => (
@@ -219,15 +219,15 @@ export const MarkdownStrikethrough: Story = {
   ),
 };
 
-export const MarkdownCombined: Story = {
-  render: () => (
-    <Text font="main-ui-body" color="text-05">
-      {markdown(
-        "*Hello*, **world**! Check out [Onyx](https://www.onyx.app/) and run `onyx start` to begin."
-      )}
-    </Text>
-  ),
-};
+// export const MarkdownCombined: Story = {
+//   render: () => (
+//     <Text font="main-ui-body" color="text-05">
+//       {markdown(
+//         "*Hello*, **world**! Check out [Onyx](https://www.onyx.app/) and run `onyx start` to begin."
+//       )}
+//     </Text>
+//   ),
+// };
 
 export const MarkdownAtDifferentSizes: Story = {
   render: () => (

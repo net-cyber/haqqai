@@ -38,8 +38,8 @@ function Main() {
   return (
     <div className="mb-8">
       <p className="mb-2 text-sm text-muted-foreground">
-        Setup Slack bots that connect to Onyx. Once setup, you will be able to
-        ask questions to Onyx directly from Slack. Additionally, you can:
+        Setup Slack bots that connect to HaqqAI. Once setup, you will be able to
+        ask questions to HaqqAI directly from Slack. Additionally, you can:
       </p>
 
       <div className="mb-2">
@@ -57,7 +57,7 @@ function Main() {
         </ul>
       </div>
 
-      <p className="mb-6 text-sm text-muted-foreground">
+      {/* <p className="mb-6 text-sm text-muted-foreground">
         Follow the{" "}
         <a
           className="text-blue-500 hover:underline"
@@ -67,8 +67,8 @@ function Main() {
         >
           guide{" "}
         </a>
-        found in the Onyx documentation to get started!
-      </p>
+        found in the HaqqAI documentation to get started!
+      </p> */}
 
       <Button
         icon={SvgPlusCircle}

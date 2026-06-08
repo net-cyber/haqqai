@@ -250,7 +250,7 @@ export default function ServiceAccountsPage() {
         <SettingsLayouts.Header
           title={route.title}
           icon={route.icon}
-          description="Use service accounts to programmatically access Onyx API."
+          description="Use service accounts to programmatically access HaqqAI API."
           divider
         />
         <SettingsLayouts.Body>
@@ -270,7 +270,7 @@ export default function ServiceAccountsPage() {
         <SettingsLayouts.Header
           title={route.title}
           icon={route.icon}
-          description="Use service accounts to programmatically access Onyx API."
+          description="Use service accounts to programmatically access HaqqAI API."
           divider
         />
         <SettingsLayouts.Body>
@@ -287,7 +287,7 @@ export default function ServiceAccountsPage() {
       <SettingsLayouts.Header
         title={route.title}
         icon={route.icon}
-        description="Use service accounts to programmatically access Onyx API."
+        description="Use service accounts to programmatically access HaqqAI API."
         divider
       />
 
@@ -444,7 +444,7 @@ export default function ServiceAccountsPage() {
                   deleteTarget.api_key_name || "Unnamed"
                 }* (\`${
                   deleteTarget.api_key_display
-                }\`) will lose access to Onyx.`
+                }\`) will lose access to HaqqAI.`
               )}
             </Text>
             <Text as="p" color="text-03">

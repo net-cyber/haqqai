@@ -7,22 +7,24 @@ const SvgOnyxLogo = ({ size, ...props }: IconProps) => (
     xmlns="http://www.w3.org/2000/svg"
     {...props}
   >
-    <path
-      d="M10.4014 13.25L18.875 32L10.3852 50.75L2 32L10.4014 13.25Z"
-      fill="var(--theme-primary-05)"
-    />
-    <path
-      d="M53.5264 13.25L62 32L53.5102 50.75L45.125 32L53.5264 13.25Z"
-      fill="var(--theme-primary-05)"
-    />
-    <path
-      d="M32 45.125L50.75 53.5625L32 62L13.25 53.5625L32 45.125Z"
-      fill="var(--theme-primary-05)"
-    />
-    <path
-      d="M32 2L50.75 10.4375L32 18.875L13.25 10.4375L32 2Z"
-      fill="var(--theme-primary-05)"
-    />
+    {/* Central pillar */}
+    <line x1="32" y1="10" x2="32" y2="54" stroke="var(--theme-primary-05)" strokeWidth="2" strokeLinecap="round"/>
+    {/* Base */}
+    <line x1="20" y1="54" x2="44" y2="54" stroke="var(--theme-primary-05)" strokeWidth="2" strokeLinecap="round"/>
+    {/* Beam */}
+    <line x1="10" y1="20" x2="54" y2="20" stroke="var(--theme-primary-05)" strokeWidth="2" strokeLinecap="round"/>
+    {/* Top pivot knob */}
+    <circle cx="32" cy="10" r="2.5" fill="var(--theme-primary-05)"/>
+    {/* Left pan strings */}
+    <line x1="10" y1="20" x2="6" y2="38" stroke="var(--theme-primary-05)" strokeWidth="1.2" strokeLinecap="round"/>
+    <line x1="10" y1="20" x2="16" y2="38" stroke="var(--theme-primary-05)" strokeWidth="1.2" strokeLinecap="round"/>
+    {/* Right pan strings */}
+    <line x1="54" y1="20" x2="48" y2="38" stroke="var(--theme-primary-05)" strokeWidth="1.2" strokeLinecap="round"/>
+    <line x1="54" y1="20" x2="58" y2="38" stroke="var(--theme-primary-05)" strokeWidth="1.2" strokeLinecap="round"/>
+    {/* Left pan */}
+    <path d="M4 38 Q11 44 18 38" stroke="var(--theme-primary-05)" strokeWidth="1.5" strokeLinecap="round"/>
+    {/* Right pan */}
+    <path d="M46 38 Q53 44 60 38" stroke="var(--theme-primary-05)" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 );
 export default SvgOnyxLogo;

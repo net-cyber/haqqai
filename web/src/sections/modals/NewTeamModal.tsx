@@ -182,7 +182,7 @@ export default function NewTeamModal() {
                   width="full"
                   rightIcon={SvgArrowRight}
                 >
-                  Try Onyx while waiting
+                  Try HaqqAI while waiting
                 </Button>
               </div>
             </div>

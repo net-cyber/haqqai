@@ -154,9 +154,9 @@ export default function LicenseActivationCard({
             Cancel
           </Button>
         </Section>
-        <Text secondaryBody text03>
+        {/* <Text secondaryBody text03>
           Manually add and activate a license for this Onyx instance.
-        </Text>
+        </Text> */}
       </Section>
 
       {/* Content */}
@@ -175,7 +175,7 @@ export default function LicenseActivationCard({
             </div>
           )}
 
-          <InputVertical
+          {/* <InputVertical
             title="License Key"
             subDescription={
               error
@@ -183,7 +183,7 @@ export default function LicenseActivationCard({
                 : "Paste or attach your license key file you received from Onyx."
             }
             withLabel
-          >
+          > */}
             <InputFile
               placeholder="eyJwYXlsb2FkIjogeyJ2ZXJzaW9..."
               setValue={(value) => {
@@ -203,7 +203,7 @@ export default function LicenseActivationCard({
                 <div className="billing-error-icon">
                   <SvgXCircle size={12} />
                 </div>
-                <Text secondaryBody text04>
+                {/* <Text secondaryBody text04>
                   {error}.{" "}
                   <a
                     href={BILLING_HELP_URL}
@@ -213,7 +213,7 @@ export default function LicenseActivationCard({
                   >
                     Billing Help
                   </a>
-                </Text>
+                </Text> */}
               </Section>
             )}
           </InputVertical>

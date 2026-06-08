@@ -60,9 +60,9 @@ export default function AccessRestricted() {
     ? getSeatLimitMessage()
     : showRenewalMessage
       ? NEXT_PUBLIC_CLOUD_ENABLED
-        ? "Your access to Onyx has been temporarily suspended due to a lapse in your subscription."
-        : "Your access to Onyx has been temporarily suspended due to a lapse in your license."
-      : "An Enterprise license is required to use Onyx. Your data is protected and will be available once a license is activated.";
+        ? "Your access to HaqqAI has been temporarily suspended due to a lapse in your subscription."
+        : "Your access to HaqqAI has been temporarily suspended due to a lapse in your license."
+      : "An Enterprise license is required to use HaqqAI. Your data is protected and will be available once a license is activated.";
 
   const handleResubscribe = async () => {
     setIsLoading(true);
@@ -118,7 +118,7 @@ export default function AccessRestricted() {
       ) : NEXT_PUBLIC_CLOUD_ENABLED ? (
         <>
           <Text text03>
-            To reinstate your access and continue benefiting from Onyx&apos;s
+            To reinstate your access and continue benefiting from HaqqAI&apos;s
             powerful features, please update your payment information.
           </Text>
 
@@ -149,7 +149,7 @@ export default function AccessRestricted() {
         <>
           <Text text03>
             {hadPreviousLicense
-              ? "To reinstate your access and continue using Onyx, please contact your system administrator to renew your license."
+              ? "To reinstate your access and continue using HaqqAI, please contact your system administrator to renew your license."
               : "To get started, please contact your system administrator to obtain an Enterprise license."}
           </Text>
 
@@ -160,9 +160,9 @@ export default function AccessRestricted() {
             </Link>{" "}
             page to {hadPreviousLicense ? "renew" : "activate"} your license,
             sign up through Stripe or reach out to{" "}
-            <a className={linkClassName} href="mailto:support@onyx.app">
+            {/* <a className={linkClassName} href="mailto:support@onyx.app">
               support@onyx.app
-            </a>{" "}
+            </a>{" "} */}
             for billing assistance.
           </Text>
 

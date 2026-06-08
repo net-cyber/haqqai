@@ -70,11 +70,11 @@ function AuthErrorContent({ message: rawMessage }: AuthErrorContentProps) {
           Return to Login Page
         </Button>
 
-        <Text mainContentBody text04>
+        {/* <Text mainContentBody text04>
           {NEXT_PUBLIC_CLOUD_ENABLED ? (
             <>
               If you continue to experience problems, please reach out to the
-              Onyx team at{" "}
+              HaqqAI team at{" "}
               <a href="mailto:support@onyx.app" className="text-action-link-05">
                 support@onyx.app
               </a>
@@ -82,7 +82,7 @@ function AuthErrorContent({ message: rawMessage }: AuthErrorContentProps) {
           ) : (
             "If you continue to experience problems, please reach out to your system administrator for assistance."
           )}
-        </Text>
+        </Text> */}
       </div>
     </AuthFlowContainer>
   );

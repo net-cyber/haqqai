@@ -13,7 +13,7 @@ export default function OnboardingInfoPages({
     return (
       <div className="flex-1 flex flex-col gap-6 items-center justify-center text-center">
         <Text font="heading-h2" color="text-05">
-          What is Onyx Craft?
+          What is HaqqAI Craft?
         </Text>
         <img
           src="/craft_demo_image_1.png"

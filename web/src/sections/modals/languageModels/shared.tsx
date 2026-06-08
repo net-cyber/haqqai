@@ -124,7 +124,7 @@ export function APIKeyField({
  * `host.docker.internal`.
  */
 export const CONTAINERIZED_HOST_NOTE =
-  "With Onyx running in a container, `host.docker.internal` acts like `localhost` inside the container.";
+  "With HaqqAI running in a container, `host.docker.internal` acts like `localhost` inside the container.";
 
 export interface APIBaseFieldProps {
   optional?: boolean;

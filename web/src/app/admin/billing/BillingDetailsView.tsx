@@ -285,7 +285,7 @@ function SubscriptionCard({
           height="auto"
           width="fit"
         >
-          {isManualLicenseOnly ? (
+          {/* {isManualLicenseOnly ? (
             <Text secondaryBody text03 className="text-right">
               Your plan is managed through sales.
               <br />
@@ -331,7 +331,7 @@ function SubscriptionCard({
                 Manage Plan
               </OpalButton>
             </Section>
-          )}
+          )} */}
           {endTrialError && (
             <Text secondaryBody className="text-status-error-04">
               {endTrialError}

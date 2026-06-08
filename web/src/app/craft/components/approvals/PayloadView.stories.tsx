@@ -100,18 +100,18 @@ export const ArrayOfObjects: Story = {
 
 // Comma-joined primitives past the string-truncation threshold render
 // with Show more, just like long string values do.
-export const LongArrayOfPrimitives: Story = {
-  args: {
-    payload: {
-      repository: "onyx-dot-app/onyx",
-      issue_number: 12047,
-      assignees: Array.from(
-        { length: 40 },
-        (_, i) => `eng-team-member-${(i + 1).toString().padStart(3, "0")}`
-      ),
-    },
-  },
-};
+// export const LongArrayOfPrimitives: Story = {
+//   args: {
+//     payload: {
+//       repository: "onyx-dot-app/onyx",
+//       issue_number: 12047,
+//       assignees: Array.from(
+//         { length: 40 },
+//         (_, i) => `eng-team-member-${(i + 1).toString().padStart(3, "0")}`
+//       ),
+//     },
+//   },
+// };
 
 // Deeply populated nested object — the value's pretty-printed JSON is
 // dozens of lines, so it renders truncated by default with a Show more
@@ -132,16 +132,16 @@ export const LargeNestedObject: Story = {
 
 // Keys under the column cap auto-size to fit the widest one across
 // rows — no ellipsis needed.
-export const WideKeysAllFit: Story = {
-  args: {
-    payload: {
-      repository: "onyx-dot-app/onyx",
-      branch: "whuang/feature",
-      head_commit_sha: "8a383f69a1",
-      title: "Add structured payload renderer",
-    },
-  },
-};
+// export const WideKeysAllFit: Story = {
+//   args: {
+//     payload: {
+//       repository: "onyx-dot-app/onyx",
+//       branch: "whuang/feature",
+//       head_commit_sha: "8a383f69a1",
+//       title: "Add structured payload renderer",
+//     },
+//   },
+// };
 
 // A key longer than the 10rem column cap cuts off with a CSS ellipsis.
 // Hover the truncated key to see the full string via the native title

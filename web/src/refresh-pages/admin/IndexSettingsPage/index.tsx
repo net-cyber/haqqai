@@ -97,7 +97,7 @@ const route = ADMIN_ROUTES.INDEX_SETTINGS;
 
 const MODEL_TAB_CLOUD = "cloud-based";
 const MODEL_TAB_SELF = "self-hosted";
-const CLOUD_TOOLTIP = "This setting is managed by Onyx Cloud.";
+const CLOUD_TOOLTIP = "This setting is managed by HaqqAI Cloud.";
 
 /**
  * Wrapper that disables its children when either:
@@ -1068,7 +1068,7 @@ export default function IndexSettingsPage() {
                         headerPadding="sm"
                         title="Changes require a full re-index."
                         description={markdown(
-                          "Modifying embedding or retrieval settings requires a full re-index of all documents to take effect, which may take **hours or days** depending on corpus size. [Learn More](https://docs.onyx.app/security/architecture/data_flows)"
+                          "Modifying embedding or retrieval settings requires a full re-index of all documents to take effect, which may take **hours or days** depending on corpus size. [Learn More](https://docs.HaqqAI.app/security/architecture/data_flows)"
                         )}
                         bottomChildren={
                           dirty ? (
@@ -1139,7 +1139,7 @@ export default function IndexSettingsPage() {
                   >
                     <Content
                       title="Embedding Model"
-                      description="Onyx uses this model to encode documents for search and retrieval."
+                      description="HaqqAI uses this model to encode documents for search and retrieval."
                       sizePreset="main-content"
                       variant="section"
                     />
@@ -1150,7 +1150,7 @@ export default function IndexSettingsPage() {
                           <GeneralLayouts.Section padding={0.5}>
                             <Content
                               icon={SvgVector}
-                              title="Embedding model and settings are managed by Onyx Cloud."
+                              title="Embedding model and settings are managed by HaqqAI Cloud."
                               sizePreset="main-ui"
                               variant="section"
                             />

@@ -201,7 +201,7 @@ export default function ConfigureProviderModal({
           title={headerTitle}
           description={
             managed
-              ? "Provided by Onyx — configure what the agent may do."
+              ? "Provided by HaqqAI — configure what the agent may do."
               : descriptor.setup_instructions
           }
         />
@@ -209,7 +209,7 @@ export default function ConfigureProviderModal({
           <div className="flex flex-col gap-3">
             {managed ? (
               <Text font="secondary-body" color="text-03">
-                This app is provided by Onyx — credentials are managed for you.
+                This app is provided by HaqqAI — credentials are managed for you.
                 Enable it from the apps list, then choose what the agent may do
                 below.
               </Text>

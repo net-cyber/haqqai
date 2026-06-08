@@ -128,7 +128,7 @@ function SettingsPopover({
           rounding="sm"
           icon={SvgHelpCircle}
           title="Help & FAQ"
-          href="https://docs.onyx.app"
+          href="https://docs.HaqqAI.app"
           target="_blank"
         />,
         settings?.enterpriseSettings?.custom_help_link_url && (
@@ -178,9 +178,9 @@ function SettingsPopover({
             orientation="reverse"
             icon={SvgOnyxLogo}
             title={markdown(
-              `[Onyx ${
+              `[HaqqAI ${
                 settings?.webVersion ?? "dev"
-              }](https://docs.onyx.app/changelog)`
+              }](https://docs.HaqqAI.app/changelog)`
             )}
           />
         </div>,

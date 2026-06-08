@@ -17,21 +17,21 @@ export const Default: Story = {
   render: () => <LinkButton href="/">Home</LinkButton>,
 };
 
-export const ExternalLink: Story = {
-  render: () => (
-    <LinkButton href="https://onyx.app" target="_blank">
-      Onyx
-    </LinkButton>
-  ),
-};
+// export const ExternalLink: Story = {
+//   render: () => (
+//     <LinkButton href="https://onyx.app" target="_blank">
+//       Onyx
+//     </LinkButton>
+//   ),
+// };
 
-export const LongLabel: Story = {
-  render: () => (
-    <LinkButton href="https://docs.onyx.app" target="_blank">
-      Go read the full Onyx documentation site
-    </LinkButton>
-  ),
-};
+// export const LongLabel: Story = {
+//   render: () => (
+//     <LinkButton href="https://docs.onyx.app" target="_blank">
+//       Go read the full Onyx documentation site
+//     </LinkButton>
+//   ),
+// };
 
 // ─── Button mode ────────────────────────────────────────────────────────────
 
@@ -90,15 +90,15 @@ export const TooltipSides: Story = {
 
 // ─── Inline in prose ────────────────────────────────────────────────────────
 
-export const InlineInProse: Story = {
-  render: () => (
-    <p style={{ maxWidth: "36rem", lineHeight: 1.7 }}>
-      Modifying embedding settings requires a full re-index of all documents and
-      may take hours or days depending on corpus size.{" "}
-      <LinkButton href="https://docs.onyx.app" target="_blank">
-        Learn more
-      </LinkButton>
-      .
-    </p>
-  ),
-};
+// export const InlineInProse: Story = {
+//   render: () => (
+//     <p style={{ maxWidth: "36rem", lineHeight: 1.7 }}>
+//       Modifying embedding settings requires a full re-index of all documents and
+//       may take hours or days depending on corpus size.{" "}
+//       <LinkButton href="https://docs.onyx.app" target="_blank">
+//         Learn more
+//       </LinkButton>
+//       .
+//     </p>
+//   ),
+// };

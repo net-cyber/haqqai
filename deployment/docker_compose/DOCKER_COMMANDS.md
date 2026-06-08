@@ -345,20 +345,32 @@ After adding, run: `source ~/.bashrc` or `source ~/.zshrc`
 
 ## Common Issues & Solutions
 
-### Issue: web_server is unhealthy
+### Issue: web_server is unhealthy or timing out
 
-**Cause:** The container is starting but the health check is failing.
+**Cause:** Bun install may have network connection issues or take too long to download packages.
 
 **Solution:**
+1. **Updated healthcheck timeouts** - The `docker-compose.hotreload.yml` now has extended health check periods (300s start_period, 30 retries)
+2. **Removed `--frozen-lockfile`** - This makes bun more resilient to network issues
+
 ```bash
-# Check if Next.js dev server is actually running
-docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.hotreload.yml logs web_server --tail=50
+# Just start normally - it will take 2-5 minutes on first run
+docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.hotreload.yml up -d
 
-# If you see "Ready in Xms", the server is running
-# Wait 1-2 minutes for health check to pass, or manually test:
-curl http://localhost:3000
+# Watch the logs to see progress
+docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.hotreload.yml logs -f web_server
 
-# If it responds, the container will eventually become healthy
+# Look for "▲ Next.js" and "Ready in Xms" - then it's working
+# The health check will pass automatically after the dev server starts
+```
+
+**If it still fails:**
+```bash
+# Check the logs for connection errors
+docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.hotreload.yml logs web_server | grep -i error
+
+# Try rebuilding
+docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.hotreload.yml up -d --build web_server
 ```
 
 ### Issue: Changes not reflecting
