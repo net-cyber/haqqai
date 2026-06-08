@@ -16,6 +16,47 @@ This file provides guidance to AI agents when working with code in this reposito
 - Put ALL db operations under the `backend/onyx/db` / `backend/ee/onyx/db` directories. Don't run queries
   outside of those directories.
 
+## Docker Development Setup
+
+For complete Docker development commands and troubleshooting, see:
+**[deployment/docker_compose/DOCKER_COMMANDS.md](deployment/docker_compose/DOCKER_COMMANDS.md)**
+
+### Quick Start for Local Development with Hot-Reload
+
+```bash
+cd deployment/docker_compose
+
+# First time - builds images and starts with hot-reload
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.dev.yml \
+  -f docker-compose.hotreload.yml \
+  up -d --build
+
+# Subsequent starts (no rebuild needed)
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.dev.yml \
+  -f docker-compose.hotreload.yml \
+  up -d
+
+# Check status
+docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.hotreload.yml ps
+
+# View logs
+docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.hotreload.yml logs -f
+```
+
+### Access Points (Local Development)
+- **Frontend**: http://localhost:3000 (with hot-reload)
+- **Backend API**: http://localhost:8080 (with hot-reload via uvicorn --reload)
+- **PostgreSQL**: localhost:5434 (mapped from container's 5432)
+- **Redis**: localhost:6379
+- **OpenSearch**: localhost:9200
+- **MinIO**: localhost:9004 (API), localhost:9005 (Console)
+
+**Note:** Nginx is not needed for local development. Access services directly via their ports.
+
 ## Project Overview
 
 **Onyx** (formerly Danswer) is an open-source Gen-AI and Enterprise Search platform that connects to company documents, apps, and people. It features a modular architecture with both Community Edition (MIT licensed) and Enterprise Edition offerings.

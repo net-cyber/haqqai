@@ -1,6 +1,31 @@
 # Welcome to Onyx
 
-To set up Onyx there are several options, Onyx supports the following for deployment:
+## 🚀 Quick Links
+
+- **[DOCKER_COMMANDS.md](DOCKER_COMMANDS.md)** - Complete Docker development commands reference
+- **[docker-dev-aliases.sh](docker-dev-aliases.sh)** - Convenient aliases for development
+
+## Local Development Setup
+
+For **local development with hot-reload**, see the [DOCKER_COMMANDS.md](DOCKER_COMMANDS.md) file for comprehensive documentation.
+
+**Quick start:**
+```bash
+cd /home/analemma/dev/haqqai/deployment/docker_compose
+
+# Start with hot-reload (first time)
+docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.hotreload.yml up -d --build
+
+# Access the application
+# Frontend: http://localhost:3000
+# Backend: http://localhost:8080
+```
+
+---
+
+# Production Deployment
+
+To set up Onyx for production, there are several options, Onyx supports the following for deployment:
 1. Quick guided install via the install.sh script
 2. Pulling the repo and running `docker compose up -d` from the deployment/docker_compose directory
   - Note, it is recommended to copy over the env.template file to .env and edit the necessary values

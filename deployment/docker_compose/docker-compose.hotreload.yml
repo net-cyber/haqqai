@@ -1,0 +1,106 @@
+# Hot-reload development override
+#
+# Mounts your local source into the containers so edits are picked up
+# immediately — no image rebuilds needed after the first `--build`.
+#
+# USAGE (from repo root):
+#   cd deployment/docker_compose
+#   cp env.template .env          # first time only — edit as needed
+#   docker compose \
+#     -f docker-compose.yml \
+#     -f docker-compose.dev.yml \
+#     -f docker-compose.hotreload.yml \
+#     up -d --build
+#
+# Frontend: instant reload via Next.js dev server  → http://localhost:3000
+# Backend:  instant reload via uvicorn --reload    → http://localhost:8080
+#
+# To watch logs:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.hotreload.yml logs -f web_server api_server
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # FRONTEND — Next.js dev server (hot reload)
+  # ---------------------------------------------------------------------------
+  web_server:
+    image: onyx-web-dev:local
+    build:
+      context: ../../web
+      dockerfile: Dockerfile.dev
+    # Install deps at startup so they land inside the bind-mounted /app,
+    # then run the dev server. node_modules will be created in the mounted
+    # source tree on your host (gitignored).
+    command: sh -c "bun install --frozen-lockfile && bun run dev"
+    volumes:
+      # Bind-mount source so Next.js sees file changes immediately
+      - ../../web:/app
+      # Keep node_modules in a named Docker volume — NOT on the host.
+      # Bun uses hardlinks from its cache; those break on bind mounts.
+      # The named volume persists across restarts so install is fast after the first time.
+      - web_node_modules:/app/node_modules
+    environment:
+      - INTERNAL_URL=${INTERNAL_URL:-http://api_server:8080}
+      - NODE_ENV=development
+      # Disable telemetry in dev
+      - NEXT_TELEMETRY_DISABLED=1
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://127.0.0.1:3000/', (r) => process.exit(r.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 90s
+
+  # ---------------------------------------------------------------------------
+  # BACKEND API — uvicorn --reload (hot reload)
+  # ---------------------------------------------------------------------------
+  api_server:
+    image: onyx-api-dev:local
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+      target: runtime
+    command: >
+      /bin/sh -c "alembic upgrade head &&
+      echo 'Starting api_server in dev/reload mode' &&
+      uvicorn onyx.main:app --host 0.0.0.0 --port 8080 --reload --reload-dir /app/onyx"
+    volumes:
+      # Mount backend source so uvicorn --reload picks up Python changes
+      - ../../backend:/app
+    healthcheck:
+      # Give more time on first boot (alembic + model downloads)
+      start_period: 180s
+
+  # ---------------------------------------------------------------------------
+  # BACKGROUND WORKER — source-mounted (restart to pick up changes)
+  # ---------------------------------------------------------------------------
+  background:
+    image: onyx-api-dev:local
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+      target: runtime
+    volumes:
+      - ../../backend:/app
+
+  # ---------------------------------------------------------------------------
+  # Reduce OpenSearch heap for local dev (saves ~1.5 GB RAM)
+  # ---------------------------------------------------------------------------
+  opensearch:
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - bootstrap.memory_lock=false
+
+volumes:
+  # Named volume for web node_modules so bun's hardlink cache works correctly.
+  # Without this, bun writes to the bind-mounted host filesystem where hardlinks
+  # fail, resulting in incomplete package installations (missing CJS files, etc).
+  web_node_modules:

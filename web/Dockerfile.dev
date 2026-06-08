@@ -1,0 +1,22 @@
+# Lightweight dev image for hot-reload local development.
+# NOT for production — use Dockerfile for that.
+#
+# Source is bind-mounted at runtime. Dependencies are installed at container
+# startup into a named Docker volume (not the bind-mounted host dir) so bun's
+# hardlink cache works correctly.
+
+ARG BASE_IMAGE_REGISTRY=docker.io
+FROM ${BASE_IMAGE_REGISTRY}/library/node:24-alpine
+
+# bun is needed for installing deps and running the dev server
+COPY --from=oven/bun:1-alpine /usr/local/bin/bun /usr/local/bin/bun
+COPY --from=oven/bun:1-alpine /usr/local/bin/bunx /usr/local/bin/bunx
+
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+EXPOSE 3000
+
+# Command is overridden by docker-compose.hotreload.yml
+CMD ["bun", "run", "dev"]
