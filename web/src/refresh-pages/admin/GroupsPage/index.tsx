@@ -4,8 +4,8 @@ import type { Route } from "next";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
-import { SvgExternalLink, SvgUsers, SvgSimpleLoader } from "@opal/icons";
-import { Button, MessageCard } from "@opal/components";
+import { SvgUsers, SvgSimpleLoader } from "@opal/icons";
+import { MessageCard } from "@opal/components";
 import { SettingsLayouts } from "@opal/layouts";
 import { errorHandlingFetcher } from "@/lib/fetcher";
 import type { UserGroup } from "@/lib/types";
@@ -33,20 +33,7 @@ function GroupsPage() {
             variant="info"
             title="Upcoming changes to permissions"
             description="HaqqAI is transitioning to group-based permissions, enabling more flexible access control through configurable permissions per group. We recommend reviewing your group structure to prepare for this update."
-            rightChildren={
-              // <Button
-              //   icon={SvgExternalLink}
-              //   onClick={() =>
-              //     window.open(
-              //       "https://docs.onyx.app/admins/permissions/whats_changing",
-              //       "_blank",
-              //       "noopener,noreferrer"
-              //     )
-              //   }
-              // >
-              //   Learn more
-              // </Button>
-            }
+            rightChildren={<></>}
           />
         </SettingsLayouts.Header>
       </div>

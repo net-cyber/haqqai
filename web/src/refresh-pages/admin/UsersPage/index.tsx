@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SvgExternalLink, SvgUser, SvgUserPlus } from "@opal/icons";
+import { SvgUser, SvgUserPlus } from "@opal/icons";
 import { Button, MessageCard } from "@opal/components";
 import { SettingsLayouts } from "@opal/layouts";
 import { useScimToken } from "@/hooks/useScimToken";
@@ -82,20 +82,7 @@ export default function UsersPage() {
           variant="info"
           title="Upcoming changes to permissions"
           description="HaqqAI is transitioning to group-based permissions for more granular access control. Curator and Global Curator roles will be replaced by configurable group permissions. We recommend reviewing current role assignments to ensure a smooth transition."
-          rightChildren={
-            // <Button
-            //   icon={SvgExternalLink}
-            //   onClick={() =>
-            //     window.open(
-            //       "https://docs.onyx.app/admins/permissions/whats_changing",
-            //       "_blank",
-            //       "noopener,noreferrer"
-            //     )
-            //   }
-            // >
-            //   Learn more
-            // </Button>
-          }
+          rightChildren={<></>}
         />
       </SettingsLayouts.Header>
       <SettingsLayouts.Body>

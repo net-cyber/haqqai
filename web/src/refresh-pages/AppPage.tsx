@@ -497,7 +497,7 @@ export default function AppPage({ firstMessage }: ChatPageProps) {
 
   useEffect(() => {
     if (
-      (!personaIncludesRetrieval &&
+      (!retrievalEnabled &&
         (!selectedDocuments || selectedDocuments.length === 0) &&
         documentSidebarVisible) ||
       !currentChatSessionId
