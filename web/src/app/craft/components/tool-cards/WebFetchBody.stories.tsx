@@ -32,27 +32,27 @@ function webfetch(overrides: Partial<ToolCallState>): ToolCallState {
   };
 }
 
-// export const JsonResponse: Story = {
-//   args: {
-//     toolCall: webfetch({
-//       description: "https://api.github.com/repos/onyx-dot-app/onyx",
-//       rawOutput: `{
-//   "id": 758315521,
-//   "name": "onyx",
-//   "full_name": "onyx-dot-app/onyx",
-//   "private": false,
-//   "html_url": "https://github.com/onyx-dot-app/onyx",
-//   "description": "Gen-AI Chat for Teams",
-//   "language": "Python",
-//   "stargazers_count": 12450,
-//   "watchers_count": 12450,
-//   "forks_count": 1620,
-//   "open_issues_count": 287,
-//   "default_branch": "main"
-// }`,
-//     }),
-//   },
-// };
+export const JsonResponse: Story = {
+  args: {
+    toolCall: webfetch({
+      description: "https://api.github.com/repos/HaqqAI-dot-app/HaqqAI",
+      rawOutput: `{
+  "id": 758315521,
+  "name": "onyx",
+  "full_name": "onyx-dot-app/onyx",
+  "private": false,
+  "html_url": "https://github.com/HaqqAI-dot-app/HaqqAI",
+  "description": "Gen-AI Chat for Teams",
+  "language": "Python",
+  "stargazers_count": 12450,
+  "watchers_count": 12450,
+  "forks_count": 1620,
+  "open_issues_count": 287,
+  "default_branch": "main"
+}`,
+    }),
+  },
+};
 
 export const HtmlResponse: Story = {
   args: {

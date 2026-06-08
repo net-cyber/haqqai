@@ -278,3 +278,14 @@ const ENTERPRISE_FEATURES: PlanFeature[] = [
 //     </Section>
 //   );
 // }
+
+interface PlansViewProps {
+  hasSubscription?: boolean;
+  hasLicense?: boolean;
+  onCheckout: () => void;
+  hideFeatures?: boolean;
+}
+
+export default function PlansView(_props: PlansViewProps) {
+  return null;
+}

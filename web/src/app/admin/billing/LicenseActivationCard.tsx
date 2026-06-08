@@ -216,7 +216,7 @@ export default function LicenseActivationCard({
                 </Text> */}
               </Section>
             )}
-          </InputVertical>
+          {/* </InputVertical> */}
         </Section>
       </div>
 
