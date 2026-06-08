@@ -15,6 +15,7 @@
 # Frontend: instant reload via Next.js dev server  → http://localhost:3000
 # Backend:  instant reload via uvicorn --reload    → http://localhost:8080
 #
+#
 # To watch logs:
 #   docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.hotreload.yml logs -f web_server api_server
 
