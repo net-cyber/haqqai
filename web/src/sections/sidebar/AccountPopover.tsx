@@ -107,20 +107,20 @@ function SettingsPopover({
             onClick={onUserSettingsClick}
           />
         </div>,
-        <LineItemButton
-          key="notifications"
-          sizePreset="main-ui"
-          variant="section"
-          rounding="sm"
-          icon={SvgBell}
-          title="Notifications"
-          onClick={onOpenNotifications}
-          rightChildren={
-            undismissedCount ? (
-              <SvgNotificationBubble count={undismissedCount} />
-            ) : undefined
-          }
-        />,
+        // <LineItemButton
+        //   key="notifications"
+        //   sizePreset="main-ui"
+        //   variant="section"
+        //   rounding="sm"
+        //   icon={SvgBell}
+        //   title="Notifications"
+        //   onClick={onOpenNotifications}
+        //   rightChildren={
+        //     undismissedCount ? (
+        //       <SvgNotificationBubble count={undismissedCount} />
+        //     ) : undefined
+        //   }
+        // />,
         <LineItemButton
           key="help-faq"
           sizePreset="main-ui"
