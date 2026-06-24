@@ -567,15 +567,12 @@ services:
   litellm:
     image: ghcr.io/berriai/litellm:main-stable
     restart: unless-stopped
+    ports:
+      - "4000:4000"
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - LITELLM_MASTER_KEY=sk-haqqai
     command: --model gemini/gemini-embedding-2-preview --port 4000
-    logging:
-      driver: json-file
-      options:
-        max-size: "50m"
-        max-file: "6"
 
 volumes:
   # Necessary for persisting data for use
