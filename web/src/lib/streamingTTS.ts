@@ -60,12 +60,57 @@ export class HTTPStreamingTTSPlayer {
       speed,
     });
 
-    // Check if MediaSource is supported
-    if (!window.MediaSource || !MediaSource.isTypeSupported("audio/mpeg")) {
-      // Fallback to simple buffered playback
-      return this.fallbackSpeak(url, body);
+    // Fetch first so the player can be chosen based on the actual audio
+    // format returned by the provider (MediaSource only decodes MP3).
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+        signal: this.abortController.signal,
+        credentials: "include",
+      });
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return;
+      this.onError?.(err instanceof Error ? err.message : "TTS error");
+      throw err;
     }
 
+    if (!response.ok) {
+      let message = `TTS request failed (${response.status})`;
+      try {
+        const errorJson = await response.json();
+        if (errorJson.detail) message = errorJson.detail;
+      } catch {
+        // response wasn't JSON — use status text
+      }
+      this.onError?.(message);
+      throw new Error(message);
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+
+    // MediaSource streaming only works for MP3. For any other format (e.g.
+    // Hasab returns WAV), buffer the whole response and play it through an
+    // <audio> element, which decodes WAV/MP3/OGG natively.
+    const canStreamMp3 =
+      !!window.MediaSource &&
+      MediaSource.isTypeSupported("audio/mpeg") &&
+      contentType.includes("mpeg");
+
+    if (!canStreamMp3) {
+      return this.bufferedPlay(response, contentType);
+    }
+
+    return this.streamMp3ViaMediaSource(response);
+  }
+
+  /**
+   * Stream an MP3 response progressively via MediaSource Extensions for
+   * low-latency, gapless playback.
+   */
+  private async streamMp3ViaMediaSource(response: Response): Promise<void> {
     // Create MediaSource and audio element
     this.mediaSource = new MediaSource();
     this.audioElement = new Audio();
@@ -124,27 +169,8 @@ export class HTTPStreamingTTSPlayer {
       };
     });
 
-    // Start fetching and streaming audio
+    // Stream the audio body into the source buffer
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body,
-        signal: this.abortController.signal,
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        let message = `TTS request failed (${response.status})`;
-        try {
-          const errorJson = await response.json();
-          if (errorJson.detail) message = errorJson.detail;
-        } catch {
-          // response wasn't JSON — use status text
-        }
-        throw new Error(message);
-      }
-
       const reader = response.body?.getReader();
       if (!reader) {
         throw new Error("No response body");
@@ -244,32 +270,18 @@ export class HTTPStreamingTTSPlayer {
   }
 
   /**
-   * Fallback for browsers that don't support MediaSource Extensions.
-   * Buffers all audio before playing.
+   * Buffer the entire response and play it through an <audio> element.
+   * Used for non-MP3 formats (e.g. WAV) and browsers without MediaSource.
    */
-  private async fallbackSpeak(url: string, body: string): Promise<void> {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body,
-      signal: this.abortController?.signal,
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      let message = `TTS request failed (${response.status})`;
-      try {
-        const errorJson = await response.json();
-        if (errorJson.detail) message = errorJson.detail;
-      } catch {
-        // response wasn't JSON — use status text
-      }
-      throw new Error(message);
-    }
-
+  private async bufferedPlay(
+    response: Response,
+    contentType: string
+  ): Promise<void> {
     const audioData = await response.arrayBuffer();
 
-    const blob = new Blob([audioData], { type: "audio/mpeg" });
+    const blob = new Blob([audioData], {
+      type: contentType || "audio/mpeg",
+    });
     const audioUrl = URL.createObjectURL(blob);
 
     this.audioElement = new Audio(audioUrl);

@@ -225,11 +225,13 @@ async def synthesize_speech(
             yield chunk
         logger.info("TTS streaming complete: %s chunks sent", chunk_count)
 
+    mime_type = provider.tts_output_mime_type()
+    extension = "wav" if mime_type == "audio/wav" else "mp3"
     return StreamingResponse(
         audio_stream(),
-        media_type="audio/mpeg",
+        media_type=mime_type,
         headers={
-            "Content-Disposition": "inline; filename=speech.mp3",
+            "Content-Disposition": f"inline; filename=speech.{extension}",
             "Cache-Control": "no-cache",
             "X-Accel-Buffering": "no",
         },

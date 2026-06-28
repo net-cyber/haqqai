@@ -64,6 +64,18 @@ export const VOICE_PROVIDER_DETAILS: Record<string, VoiceProviderDetail> = {
       label: "ElevenLabs",
     },
   },
+  hasab: {
+    label: "Hasab AI",
+    icon: SvgMicrophone,
+    apiKeyUrl: "https://hasab.ai",
+    docsUrl: "https://developer.hasab.ai",
+    voiceDocsUrl: {
+      url: "https://developer.hasab.ai/supported-languages",
+      label: "Hasab AI",
+    },
+    sttModels: [{ id: "hasab-stt", name: "Hasab Transcription" }],
+    ttsModels: [{ id: "hasab-tts", name: "Hasab Text-to-Speech" }],
+  },
 };
 
 /** Returns the detail entry for a provider type, falling back to a generic entry for unknown types. */

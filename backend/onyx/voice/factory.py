@@ -66,5 +66,17 @@ def get_voice_provider(provider: VoiceProvider) -> VoiceProviderInterface:
             default_voice=default_voice,
         )
 
+    elif provider_type == "hasab":
+        from onyx.voice.providers.hasab import HasabVoiceProvider
+
+        return HasabVoiceProvider(
+            api_key=api_key,
+            api_base=api_base,
+            custom_config=custom_config,
+            stt_model=stt_model,
+            tts_model=tts_model,
+            default_voice=default_voice,
+        )
+
     else:
         raise ValueError(f"Unsupported voice provider type: {provider_type}")

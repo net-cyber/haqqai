@@ -146,6 +146,16 @@ class VoiceProviderInterface(ABC):
         """Returns True if this provider supports real-time streaming TTS."""
         return False
 
+    def tts_output_mime_type(self) -> str:
+        """MIME type of the audio produced by ``synthesize_stream``.
+
+        Defaults to MP3 (``audio/mpeg``). Override when the provider returns a
+        different container so the HTTP layer can advertise the correct
+        Content-Type and the frontend can choose a compatible player path
+        (MediaSource only handles MP3; WAV must go through an <audio> element).
+        """
+        return "audio/mpeg"
+
     async def create_streaming_transcriber(
         self, audio_format: str = "webm"
     ) -> StreamingTranscriberProtocol:

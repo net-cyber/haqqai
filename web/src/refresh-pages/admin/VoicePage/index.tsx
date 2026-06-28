@@ -55,6 +55,12 @@ const STT_MODELS: ModelDetails[] = [
     subtitle: "ElevenLabs Speech to Text API.",
     providerType: "elevenlabs",
   },
+  {
+    id: "hasab-stt",
+    label: "Hasab AI",
+    subtitle: "Speech to text for Amharic, Afaan Oromoo, and more.",
+    providerType: "hasab",
+  },
 ];
 
 // TTS Models - grouped by provider
@@ -98,6 +104,18 @@ const TTS_PROVIDER_GROUPS: ProviderGroup[] = [
         label: "ElevenAPI",
         subtitle: "ElevenLabs Text to Speech API.",
         providerType: "elevenlabs",
+      },
+    ],
+  },
+  {
+    providerType: "hasab",
+    providerLabel: "Hasab AI",
+    models: [
+      {
+        id: "hasab-tts",
+        label: "Hasab AI",
+        subtitle: "Natural-sounding speech for Amharic, Afaan Oromoo, and more.",
+        providerType: "hasab",
       },
     ],
   },
