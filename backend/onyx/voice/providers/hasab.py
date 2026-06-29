@@ -117,6 +117,7 @@ class HasabStreamingTranscriber(StreamingTranscriberProtocol):
         self._audio_format = audio_format
         self._buffer = bytearray()
         self._final = ""
+        self._closed = False
 
     async def send_audio(self, chunk: bytes) -> None:
         self._buffer.extend(chunk)
@@ -128,6 +129,9 @@ class HasabStreamingTranscriber(StreamingTranscriberProtocol):
         return TranscriptResult(text="", is_vad_end=False)
 
     async def close(self) -> str:
+        if self._closed:
+            return self._final
+        self._closed = True
         if not self._buffer:
             return self._final
         try:
