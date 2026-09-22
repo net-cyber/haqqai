@@ -2,7 +2,14 @@
 // LLM Selection Types and Utilities
 // =============================================================================
 
+import { DefaultModel, ModelConfiguration } from "@/lib/languageModels/types";
+import {
+  readStorageItem,
+  writeStorageItem,
+} from "@/app/craft/utils/localStorage";
+
 export interface BuildLlmSelection {
+  providerId: number;
   providerName: string; // LLMProviderDescriptor.name (any configured provider)
   provider: string; // e.g., "anthropic"
   modelName: string; // e.g., "claude-opus-4-7"
@@ -10,163 +17,192 @@ export interface BuildLlmSelection {
 
 export type ProviderKey = "anthropic" | "openai" | "openrouter";
 
-// Single source of truth for Craft providers/models; everything below derives
-// from it (allowed types, recommended flags, default selection).
-export interface BuildModeModel {
-  name: string;
-  label: string;
-  recommended?: boolean;
+export const CRAFT_GATEWAY_PROVIDER = "onyx";
+
+// The recommended model is each provider's `is_recommended_default`, sourced
+// server-side from recommended-models.json — never a hardcoded list here.
+export function isCraftRecommendedModel(model: ModelConfiguration): boolean {
+  return model.is_visible && (model.is_recommended_default ?? false);
 }
 
-export interface BuildModeProvider {
-  key: ProviderKey;
-  label: string;
-  providerName: string;
-  recommended?: boolean;
-  models: BuildModeModel[];
-  // API-related fields (optional, only needed for onboarding modal)
-  apiKeyPlaceholder?: string;
-  apiKeyUrl?: string;
-  apiKeyLabel?: string;
-}
-
-export const BUILD_MODE_PROVIDERS: BuildModeProvider[] = [
-  {
-    key: "anthropic",
-    label: "Anthropic",
-    providerName: "anthropic",
-    recommended: true,
-    models: [
-      { name: "claude-opus-4-8", label: "Claude Opus 4.8", recommended: true },
-      { name: "claude-opus-4-7", label: "Claude Opus 4.7" },
-      { name: "claude-sonnet-4-6", label: "Claude Sonnet 4.6" },
-    ],
-    apiKeyPlaceholder: "sk-ant-...",
-    apiKeyUrl: "https://console.anthropic.com/dashboard",
-    apiKeyLabel: "Anthropic Console",
-  },
-  {
-    key: "openai",
-    label: "OpenAI",
-    providerName: "openai",
-    models: [
-      { name: "gpt-5.5", label: "GPT-5.5", recommended: true },
-      { name: "gpt-5.4", label: "GPT-5.4" },
-      { name: "gpt-5.3", label: "GPT-5.3" },
-    ],
-    apiKeyPlaceholder: "sk-...",
-    apiKeyUrl: "https://platform.openai.com/api-keys",
-    apiKeyLabel: "OpenAI Dashboard",
-  },
-  {
-    key: "openrouter",
-    label: "OpenRouter",
-    providerName: "openrouter",
-    models: [
-      {
-        name: "minimax/minimax-m3",
-        label: "MiniMax M3",
-        recommended: true,
-      },
-      {
-        name: "moonshotai/kimi-k2.6",
-        label: "Kimi K2.6",
-      },
-    ],
-    apiKeyPlaceholder: "sk-or-...",
-    apiKeyUrl: "https://openrouter.ai/keys",
-    apiKeyLabel: "OpenRouter Dashboard",
-  },
+// Common providers sorted first in the onboarding catalog. Craft routes every
+// provider through the gateway, so this is display ordering only, not a gate.
+export const CRAFT_PROVIDERS: ProviderKey[] = [
+  "anthropic",
+  "openai",
+  "openrouter",
 ];
 
-// Allowed provider types are just the curated providers' keys. Keep
-// BUILD_MODE_PROVIDERS in sync with the backend BUILD_MODE_ALLOWED_PROVIDER_TYPES
-// (enforced by test_build_mode_provider_types_sync.py).
-const ALLOWED_PROVIDER_TYPES = new Set<string>(
-  BUILD_MODE_PROVIDERS.map((p) => p.key)
-);
-const RECOMMENDED_MODEL_NAMES = new Set(
-  BUILD_MODE_PROVIDERS.flatMap((p) =>
-    p.models.filter((m) => m.recommended).map((m) => m.name)
-  )
-);
+const CRAFT_PROVIDER_KEYS = new Set<string>(CRAFT_PROVIDERS);
 
-// Top recommended Craft model's label, derived so UI copy isn't hardcoded.
-export const RECOMMENDED_CRAFT_MODEL_LABEL: string = (() => {
-  const provider =
-    BUILD_MODE_PROVIDERS.find((p) => p.recommended) ?? BUILD_MODE_PROVIDERS[0]!;
-  const model =
-    provider.models.find((m) => m.recommended) ?? provider.models[0]!;
-  return model.label;
-})();
-
-interface MinimalLlmProvider {
+export interface MinimalLlmProvider {
+  id: number;
   name: string | null;
   provider: string;
+  provider_display_name?: string | null;
+  model_configurations: ModelConfiguration[];
+}
+
+export function providerHasVisibleModel(
+  provider: MinimalLlmProvider,
+  modelName: string
+): boolean {
+  return provider.model_configurations.some(
+    (model) => model.is_visible && model.name === modelName
+  );
+}
+
+export function toLlmSelection(
+  provider: MinimalLlmProvider,
+  modelName: string
+): BuildLlmSelection {
+  return {
+    providerId: provider.id,
+    providerName: provider.name ?? "",
+    provider: provider.provider,
+    modelName,
+  };
+}
+
+export function craftProviderDisplayName(provider: {
+  name: string | null;
+  provider: string;
+  provider_display_name?: string | null;
+}): string {
+  return provider.name || provider.provider_display_name || provider.provider;
 }
 
 export function isSupportedProviderType(provider: string): boolean {
-  return ALLOWED_PROVIDER_TYPES.has(provider);
+  return CRAFT_PROVIDER_KEYS.has(provider);
 }
 
-// True when at least one configured provider is a supported Craft type
-// (anthropic/openai/openrouter). The gate for both onboarding LLM setup and
-// pre-provisioning — an unsupported-only setup (e.g. Azure) can't craft.
 export function hasSupportedCraftProvider(
-  llmProviders: { provider: string }[] | undefined
+  llmProviders:
+    | { provider: string; model_configurations?: ModelConfiguration[] }[]
+    | undefined
 ): boolean {
-  return !!llmProviders?.some((p) => isSupportedProviderType(p.provider));
+  return !!llmProviders?.some((provider) =>
+    provider.model_configurations?.some((model) => model.is_visible)
+  );
 }
 
-export function isRecommendedModel(modelName: string): boolean {
-  return RECOMMENDED_MODEL_NAMES.has(modelName);
-}
-
-function defaultModelForType(key: ProviderKey): string {
-  const p = BUILD_MODE_PROVIDERS.find((x) => x.key === key)!;
-  return (p.models.find((m) => m.recommended) ?? p.models[0]!).name;
-}
-
-// Highest-priority configured provider of a supported type, with that type's
-// recommended model. Access control is enforced server-side at session create.
+// Access control is enforced server-side at session create.
 export function getDefaultLlmSelection(
-  llmProviders: MinimalLlmProvider[] | undefined
+  llmProviders: MinimalLlmProvider[] | undefined,
+  configuredDefaults: (DefaultModel | null | undefined)[] = []
 ): BuildLlmSelection | null {
-  if (!llmProviders || llmProviders.length === 0) return null;
+  if (!llmProviders) return null;
 
-  for (const p of BUILD_MODE_PROVIDERS) {
-    const match = llmProviders.find((lp) => lp.provider === p.key);
-    if (match) {
+  // Each configured default (e.g. Craft's own default, then the shared chat
+  // default) outranks the built-in recommendation, tried in order. Mirrors
+  // the backend's _select_gateway_default.
+  for (const configuredDefault of configuredDefaults) {
+    if (!configuredDefault) continue;
+    const provider = llmProviders.find(
+      (candidate) => candidate.id === configuredDefault.provider_id
+    );
+    if (
+      provider?.model_configurations.some(
+        (model) =>
+          model.is_visible && model.name === configuredDefault.model_name
+      )
+    ) {
       return {
-        providerName: match.name ?? "",
-        provider: match.provider,
-        modelName: defaultModelForType(p.key),
+        providerId: provider.id,
+        providerName: provider.name ?? "",
+        provider: provider.provider,
+        modelName: configuredDefault.model_name,
       };
     }
   }
 
+  // Must match the backend's casefold-then-id ordering in
+  // _gateway_provider_order; localeCompare would diverge.
+  const candidates = [...llmProviders].sort((left, right) => {
+    const leftName = craftProviderDisplayName(left).toLowerCase();
+    const rightName = craftProviderDisplayName(right).toLowerCase();
+    if (leftName !== rightName) return leftName < rightName ? -1 : 1;
+    return left.id - right.id;
+  });
+
+  for (const provider of candidates) {
+    const modelName = provider.model_configurations.find(
+      isCraftRecommendedModel
+    )?.name;
+    if (!modelName) continue;
+    return toLlmSelection(provider, modelName);
+  }
+
+  // Must mirror the backend's _select_gateway_default fallback so the picker
+  // reflects the model a session would actually use: the first visible model
+  // by sorted name (backend's _visible_models_by_name), not DB order.
+  for (const provider of candidates) {
+    const modelName = provider.model_configurations
+      .filter((model) => model.is_visible)
+      .map((model) => model.name)
+      .sort()[0];
+    if (!modelName) continue;
+    return toLlmSelection(provider, modelName);
+  }
+
   return null;
+}
+
+export function resolveSessionLlmSelection(
+  agentProvider: string | null | undefined,
+  agentModel: string | null | undefined,
+  llmProviders: MinimalLlmProvider[] | undefined
+): BuildLlmSelection | null {
+  if (!agentProvider || !agentModel || !llmProviders) return null;
+
+  const separatorIndex = agentModel.indexOf("/");
+  const qualifiedProviderId = Number(agentModel.slice(0, separatorIndex));
+  const isGatewayModel =
+    agentProvider === CRAFT_GATEWAY_PROVIDER &&
+    separatorIndex > 0 &&
+    Number.isInteger(qualifiedProviderId);
+  // Legacy sessions stored only the provider type; prefer a same-type
+  // provider that actually hosts the model so the next turn's explicit
+  // provider_id doesn't route to one that lacks it.
+  const provider = isGatewayModel
+    ? llmProviders.find((candidate) => candidate.id === qualifiedProviderId)
+    : (llmProviders.find(
+        (candidate) =>
+          candidate.provider === agentProvider &&
+          providerHasVisibleModel(candidate, agentModel)
+      ) ??
+      llmProviders.find((candidate) => candidate.provider === agentProvider));
+  if (!provider) return null;
+  const modelName = isGatewayModel
+    ? agentModel.slice(separatorIndex + 1)
+    : agentModel;
+  if (isGatewayModel && !providerHasVisibleModel(provider, modelName)) {
+    return null;
+  }
+
+  return {
+    providerId: provider.id,
+    providerName: provider.name ?? provider.provider,
+    provider: provider.provider,
+    modelName,
+  };
 }
 
 // =============================================================================
 // Onboarding "seen" flag
 // =============================================================================
 
-// Tracks whether the user has dismissed the craft onboarding modal so the
-// intro only auto-shows once.
-const CRAFT_ONBOARDING_SEEN_COOKIE_NAME = "craft_onboarding_seen";
-
-export function getCraftOnboardingSeen(): boolean {
-  if (typeof document === "undefined") return false;
-  return document.cookie
-    .split("; ")
-    .some((row) => row.startsWith(`${CRAFT_ONBOARDING_SEEN_COOKIE_NAME}=`));
+// Tracks whether the user has dismissed the craft onboarding intro so it only
+// auto-shows once per user (mirrors the main app's
+// `onyx:onboardingCompleted:{userId}`).
+function craftOnboardingSeenKey(userId: string): string {
+  return `onyx:craftOnboardingSeen:${userId}`;
 }
 
-export function setCraftOnboardingSeen(): void {
-  if (typeof document === "undefined") return;
-  const expires = new Date(
-    Date.now() + 365 * 24 * 60 * 60 * 1000
-  ).toUTCString();
-  document.cookie = `${CRAFT_ONBOARDING_SEEN_COOKIE_NAME}=1; path=/; expires=${expires}; SameSite=Lax`;
+export function getCraftOnboardingSeen(userId: string): boolean {
+  return readStorageItem(craftOnboardingSeenKey(userId)) === "true";
+}
+
+export function setCraftOnboardingSeen(userId: string): void {
+  writeStorageItem(craftOnboardingSeenKey(userId), "true");
 }

@@ -7,9 +7,11 @@ Slack signals failure with {"ok": false, "error": "..."} (still HTTP 200).
 
 import argparse
 import json
+import os
 import re
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any
 
@@ -18,6 +20,7 @@ _METHOD_RE = re.compile(r"^[a-z][a-zA-Z0-9._]*$")
 _PAGE_SIZE = 200
 _DEFAULT_LIMIT = 200
 _HTTP_TIMEOUT_SECONDS = 180
+_MAX_UPLOAD_BYTES = 500 * 1024 * 1024  # Slack's own upload limit
 
 
 def _prune(value: Any) -> Any:
@@ -31,14 +34,38 @@ def _prune(value: Any) -> Any:
     return value
 
 
-def _call(method: str, body: dict[str, Any]) -> dict[str, Any]:
+def _form_value(value: Any) -> str:
+    """Coerce a param value for x-www-form-urlencoded Slack requests.
+    Booleans become "true"/"false"; nested values are JSON-encoded
+    (Slack reads complex args like blocks as JSON strings)."""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (dict, list)):
+        return json.dumps(value)
+    return str(value)
+
+
+def _call(method: str, body: dict[str, Any], as_json: bool = False) -> dict[str, Any]:
     """POST to a Slack method; return the parsed JSON. Raises on
-    transport failure (handled by the caller)."""
+    transport failure (handled by the caller).
+
+    Args are form-encoded by default, not JSON: Slack's web/query methods
+    (conversations.list, users.list, etc.) read params from the
+    form-encoded body and silently ignore a JSON body. Set as_json=True
+    for the few methods that require an application/json body."""
+    if as_json:
+        data = json.dumps(body).encode("utf-8")
+        content_type = "application/json; charset=utf-8"
+    else:
+        data = urllib.parse.urlencode(
+            {k: _form_value(v) for k, v in body.items() if v is not None}
+        ).encode("utf-8")
+        content_type = "application/x-www-form-urlencoded; charset=utf-8"
     req = urllib.request.Request(  # noqa: S310 — fixed https base url
         _BASE + method,
-        data=json.dumps(body).encode("utf-8"),
+        data=data,
         method="POST",
-        headers={"Content-Type": "application/json; charset=utf-8"},
+        headers={"Content-Type": content_type},
     )
     with urllib.request.urlopen(req, timeout=_HTTP_TIMEOUT_SECONDS) as resp:  # noqa: S310
         return json.loads(resp.read().decode("utf-8"))
@@ -107,10 +134,86 @@ def _build_parser() -> argparse.ArgumentParser:
     sp.add_argument("channel")
     sp.add_argument("text")
 
+    sp = sub.add_parser("upload", help="upload a file and share it (write)")
+    sp.add_argument("channel")
+    sp.add_argument("file_path")
+    sp.add_argument("--title", help="file title shown in Slack")
+    sp.add_argument("--comment", help="message text posted with the file")
+    sp.add_argument("--thread-ts", dest="thread_ts", help="reply in this thread")
+
     sp = sub.add_parser("call", help="raw Slack method")
     sp.add_argument("method")
     sp.add_argument("json_args", nargs="?")
+    sp.add_argument(
+        "--json",
+        dest="as_json",
+        action="store_true",
+        help="send args as a JSON body (for JSON-only methods)",
+    )
     return p
+
+
+def _raw_call(method: str, json_args: str | None, as_json: bool) -> dict[str, Any]:
+    """`call` escape hatch: invoke an arbitrary Slack method with a
+    JSON object of args."""
+    if not _METHOD_RE.match(method):
+        return {"ok": False, "error": "invalid_method_name"}
+    args: dict[str, Any] = {}
+    if json_args:
+        parsed = json.loads(json_args)
+        if not isinstance(parsed, dict):
+            return {"ok": False, "error": "json_args_not_object"}
+        args = parsed
+    return _call(method, args, as_json=as_json)
+
+
+def _upload_file(
+    channel: str,
+    file_path: str,
+    title: str | None,
+    comment: str | None,
+    thread_ts: str | None,
+) -> dict[str, Any]:
+    """Share a local file using Slack's external upload flow:
+    files.getUploadURLExternal -> POST bytes to the returned URL ->
+    files.completeUploadExternal (which posts it to the channel/thread)."""
+    if not os.path.isfile(file_path):
+        return {"ok": False, "error": "file_not_found"}
+    filename = os.path.basename(file_path)
+    length = os.path.getsize(file_path)
+    if length > _MAX_UPLOAD_BYTES:
+        return {"ok": False, "error": "file_too_large"}
+    reserved = _call(
+        "files.getUploadURLExternal", {"filename": filename, "length": length}
+    )
+    if not reserved.get("ok"):
+        return reserved
+    upload_url = reserved.get("upload_url")
+    file_id = reserved.get("file_id")
+    if not upload_url or not file_id:
+        return {"ok": False, "error": "missing_upload_url"}
+    parsed_url = urllib.parse.urlparse(upload_url)
+    if parsed_url.scheme != "https" or parsed_url.hostname != "files.slack.com":
+        return {"ok": False, "error": "untrusted_upload_url"}
+    with open(file_path, "rb") as fh:
+        content = fh.read()
+    put = urllib.request.Request(  # noqa: S310 — Slack-issued upload URL
+        upload_url,
+        data=content,
+        method="POST",
+        headers={"Content-Type": "application/octet-stream"},
+    )
+    with urllib.request.urlopen(put, timeout=_HTTP_TIMEOUT_SECONDS):  # noqa: S310
+        pass
+    file_entry: dict[str, Any] = {"id": file_id}
+    if title:
+        file_entry["title"] = title
+    complete: dict[str, Any] = {"files": [file_entry], "channel_id": channel}
+    if comment:
+        complete["initial_comment"] = comment
+    if thread_ts:
+        complete["thread_ts"] = thread_ts
+    return _call("files.completeUploadExternal", complete)
 
 
 def _dispatch(a: argparse.Namespace) -> dict[str, Any]:
@@ -147,16 +250,11 @@ def _dispatch(a: argparse.Namespace) -> dict[str, Any]:
     if a.cmd == "post":
         return _call("chat.postMessage", {"channel": a.channel, "text": a.text})
 
-    # `call` raw escape hatch
-    if not _METHOD_RE.match(a.method):
-        return {"ok": False, "error": "invalid_method_name"}
-    args: dict[str, Any] = {}
-    if a.json_args:
-        parsed = json.loads(a.json_args)
-        if not isinstance(parsed, dict):
-            return {"ok": False, "error": "json_args_not_object"}
-        args = parsed
-    return _call(a.method, args)
+    if a.cmd == "upload":
+        return _upload_file(a.channel, a.file_path, a.title, a.comment, a.thread_ts)
+
+    # `call` is the only remaining subcommand (subparser is required).
+    return _raw_call(a.method, a.json_args, a.as_json)
 
 
 def main(argv: list[str]) -> int:

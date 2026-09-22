@@ -11,15 +11,13 @@ from __future__ import annotations
 import json
 import threading
 from collections.abc import Callable
-from dataclasses import dataclass
-from dataclasses import field
-from queue import Empty
-from queue import Full
-from queue import Queue
+from dataclasses import dataclass, field
+from queue import Empty, Full, Queue
 from typing import Any
 
 import httpx
 
+from onyx.server.features.build.timeouts import CONNECT_TIMEOUT_SECONDS
 from onyx.utils.logger import setup_logger
 
 logger = setup_logger()
@@ -55,7 +53,7 @@ class PodEventBus:
         auth: httpx.Auth | None,
         *,
         directory: str | None = None,
-        connect_timeout: float = 10.0,
+        connect_timeout: float = CONNECT_TIMEOUT_SECONDS,
         event_read_timeout: float | None = None,
         reload_auth: Callable[[], httpx.Auth | None] | None = None,
     ) -> None:
@@ -182,6 +180,7 @@ class PodEventBus:
         consecutive_failures = 0
         while not self._stop.is_set():
             had_successful_read = False
+            healed_401 = False
             try:
                 self._read_one_stream()
                 had_successful_read = self.stream_ready.is_set()
@@ -191,11 +190,21 @@ class PodEventBus:
                         backoff,
                     )
             except Exception as e:
-                logger.warning(
-                    "opencode /event stream error: %s; reconnecting in %.1fs",
-                    e,
-                    backoff,
+                # Cached password was stale (pod re-provisioned with a new
+                # Secret) — re-attach immediately with the rotated credential.
+                # Still counts against the failure budget so a Secret source
+                # that keeps rotating to wrong credentials can't spin forever.
+                healed_401 = (
+                    isinstance(e, httpx.HTTPStatusError)
+                    and e.response.status_code == 401
+                    and self._refresh_auth_on_401()
                 )
+                if not healed_401:
+                    logger.warning(
+                        "opencode /event stream error: %s; reconnecting in %.1fs",
+                        e,
+                        backoff,
+                    )
             finally:
                 self.stream_ready.clear()
 
@@ -215,6 +224,8 @@ class PodEventBus:
                     self._signal_subscribers_closed()
                     return
 
+            if healed_401:
+                continue
             if self._stop.wait(backoff):
                 return
             backoff = min(backoff * 2.0, self._RECONNECT_BACKOFF_MAX)
@@ -236,8 +247,6 @@ class PodEventBus:
             params=params,
             timeout=timeout,
         ) as response:
-            if response.status_code == 401:
-                self._refresh_auth_on_401()
             response.raise_for_status()
             self.stream_ready.set()
             logger.info(
@@ -258,28 +267,29 @@ class PodEventBus:
                         continue
                     self._dispatch(evt)
 
-    def _refresh_auth_on_401(self) -> None:
-        """Reload auth so the next reconnect uses the rotated password. No-op
-        when the credential is unchanged (genuine auth failure) to avoid a
-        misleading log on every reconnect. Best-effort: failed reload keeps
-        the current auth."""
+    def _refresh_auth_on_401(self) -> bool:
+        """Reload auth after a 401; True if the credential actually rotated.
+        Unchanged credential (genuine auth failure) or a failed reload keeps
+        the current auth and returns False."""
         if self._reload_auth is None:
-            return
+            return False
         try:
             new_auth = self._reload_auth()
         except Exception as e:
             logger.warning("PodEventBus reload_auth failed after 401: %s", e)
-            return
+            return False
         if _auth_token(new_auth) == _auth_token(self._auth):
-            return
+            return False
         self._auth = new_auth
         logger.info("PodEventBus reloaded auth after 401 on %s/event", self._base_url)
+        return True
 
-    def _dispatch(self, evt: dict[str, Any]) -> None:
-        etype = evt.get("type")
-        props = evt.get("properties") or {}
+    def _dispatch(self, event: dict[str, Any]) -> None:
+        event_type = event.get("type")
+        props = event.get("properties") or {}
+        session_created_parent_id: str | None = None
 
-        if etype == "session.created":
+        if event_type == "session.created":
             info = props.get("info") if isinstance(props, dict) else None
             if isinstance(info, dict):
                 child_id = info.get("id")
@@ -290,6 +300,7 @@ class PodEventBus:
                     and child_id
                     and parent_id
                 ):
+                    session_created_parent_id = parent_id
                     with self._lock:
                         if child_id not in self._child_to_parent:
                             self._child_to_parent[child_id] = parent_id
@@ -302,40 +313,56 @@ class PodEventBus:
                                 parent_id,
                             )
 
-        sid = _extract_session_id(evt)
-        if sid is None:
-            return
+        session_id = _extract_session_id(event)
+        if session_id is None:
+            session_id = session_created_parent_id
+        log_session_id = session_id or "<unscoped>"
 
-        # Deliver to sid's own subscribers AND to every ancestor's subscribers
+        # Deliver to session_id's own subscribers AND to every ancestor's subscribers
         # so a turn subscribed only to the parent session also sees descendant
         # (subagent) events. Walk _child_to_parent up to the root, deduping so
         # no subscriber receives the event twice.
         with self._lock:
-            target_sids = [sid]
-            ancestor = self._child_to_parent.get(sid)
-            seen_sids = {sid}
-            while ancestor is not None and ancestor not in seen_sids:
-                target_sids.append(ancestor)
-                seen_sids.add(ancestor)
-                ancestor = self._child_to_parent.get(ancestor)
-            queues: list[_Subscription] = []
-            seen_subs: set[int] = set()
-            for target_sid in target_sids:
-                for sub in self._subscribers.get(target_sid, ()):
-                    if id(sub) not in seen_subs:
-                        seen_subs.add(id(sub))
-                        queues.append(sub)
-        for sub in queues:
+            target_subscriptions: list[_Subscription] = []
+            seen_subscriptions: set[int] = set()
+            if session_id is None:
+                if not _is_unscoped_terminal_event(event):
+                    return
+                # Some opencode terminal events are published without a
+                # sessionID. The bus is directory-scoped, so active subscribers
+                # are the only consumers that can observe that turn ending.
+                subscriber_groups = self._subscribers.values()
+            else:
+                target_session_ids = [session_id]
+                ancestor = self._child_to_parent.get(session_id)
+                seen_session_ids = {session_id}
+                while ancestor is not None and ancestor not in seen_session_ids:
+                    target_session_ids.append(ancestor)
+                    seen_session_ids.add(ancestor)
+                    ancestor = self._child_to_parent.get(ancestor)
+                subscriber_groups = (
+                    self._subscribers.get(target_session_id, ())
+                    for target_session_id in target_session_ids
+                )
+            for subscribers in subscriber_groups:
+                for subscription in subscribers:
+                    if id(subscription) not in seen_subscriptions:
+                        seen_subscriptions.add(id(subscription))
+                        target_subscriptions.append(subscription)
+        for subscription in target_subscriptions:
             try:
-                sub.queue.put_nowait(evt)
+                subscription.queue.put_nowait(event)
             except Full:
-                sub.dropped_count += 1
-                if sub.dropped_count == 1 or sub.dropped_count % 50 == 0:
+                subscription.dropped_count += 1
+                if (
+                    subscription.dropped_count == 1
+                    or subscription.dropped_count % 50 == 0
+                ):
                     logger.warning(
                         "PodEventBus dropped event for session %s "
                         "(queue full; total dropped=%d)",
-                        sid,
-                        sub.dropped_count,
+                        log_session_id,
+                        subscription.dropped_count,
                     )
 
 
@@ -367,6 +394,19 @@ def _extract_session_id(evt: dict[str, Any]) -> str | None:
         if isinstance(nested, str) and nested:
             return nested
     return None
+
+
+def _is_unscoped_terminal_event(event: dict[str, Any]) -> bool:
+    event_type = event.get("type")
+    if event_type in ("session.error", "session.idle"):
+        return True
+    if event_type != "session.status":
+        return False
+    props = event.get("properties")
+    if not isinstance(props, dict):
+        return False
+    status = props.get("status")
+    return isinstance(status, dict) and status.get("type") == "idle"
 
 
 def _parse_sse_block(block: str) -> dict[str, Any] | None:

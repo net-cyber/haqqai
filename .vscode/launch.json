@@ -44,6 +44,7 @@
     },
     {
       "name": "Run All Onyx Services (k8s)",
+      "preLaunchTask": "k8s: telepresence quit",
       "configurations": [
         "Web Server",
         "API Server (k8s)",
@@ -95,6 +96,17 @@
         "group": "1"
       },
       "stopAll": true
+    },
+    {
+      "name": "Web Server + Shared Watch",
+      "configurations": [
+        "Web Server",
+        "Shared Watch (rebuild dist)"
+      ],
+      "presentation": {
+        "group": "1"
+      },
+      "stopAll": true
     }
   ],
   "configurations": [
@@ -123,6 +135,22 @@
       },
       "console": "integratedTerminal",
       "consoleTitle": "Web Server Console"
+    },
+    {
+      "name": "Shared Watch (rebuild dist)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceRoot}/web/lib/shared",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "presentation": {
+        "group": "2"
+      },
+      "console": "integratedTerminal",
+      "consoleTitle": "Shared Watch Console"
     },
     {
       "name": "Model Server",
@@ -167,6 +195,8 @@
         "--reload",
         "--reload-exclude",
         "${workspaceFolder}/backend/onyx/skills/builtin",
+        "--reload-exclude",
+        "${workspaceFolder}/backend/onyx/server/features/build/sandbox/image",
         "--port",
         "8080"
       ],
@@ -195,6 +225,8 @@
         "--reload",
         "--reload-exclude",
         "${workspaceFolder}/backend/onyx/skills/builtin",
+        "--reload-exclude",
+        "${workspaceFolder}/backend/onyx/server/features/build/sandbox/image",
         "--port",
         "8080"
       ],
@@ -326,7 +358,7 @@
         "--loglevel=INFO",
         "--hostname=light@%n",
         "-Q",
-        "vespa_metadata_sync,connector_deletion,doc_permissions_upsert,checkpoint_cleanup,index_attempt_cleanup,opensearch_migration"
+        "vespa_metadata_sync,connector_deletion,doc_permissions_upsert,checkpoint_cleanup,index_attempt_cleanup,index_reclaim,opensearch_migration"
       ],
       "presentation": {
         "group": "2",
@@ -423,7 +455,7 @@
         "--loglevel=INFO",
         "--hostname=user_file_processing@%n",
         "-Q",
-        "user_file_processing,user_file_project_sync,user_file_delete"
+        "user_file_processing,user_file_project_sync,user_file_delete,user_file_port"
       ],
       "presentation": {
         "group": "2",
@@ -521,7 +553,7 @@
         "--loglevel=INFO",
         "--hostname=docprocessing@%n",
         "-Q",
-        "docprocessing"
+        "docprocessing,port"
       ],
       "presentation": {
         "group": "2",
@@ -614,7 +646,7 @@
         "--loglevel=INFO",
         "--hostname=light@%n",
         "-Q",
-        "vespa_metadata_sync,connector_deletion,doc_permissions_upsert,checkpoint_cleanup,index_attempt_cleanup,opensearch_migration"
+        "vespa_metadata_sync,connector_deletion,doc_permissions_upsert,checkpoint_cleanup,index_attempt_cleanup,index_reclaim,opensearch_migration"
       ],
       "presentation": {
         "group": "2",
@@ -714,7 +746,7 @@
         "--loglevel=INFO",
         "--hostname=user_file_processing@%n",
         "-Q",
-        "user_file_processing,user_file_project_sync,user_file_delete"
+        "user_file_processing,user_file_project_sync,user_file_delete,user_file_port"
       ],
       "presentation": {
         "group": "2",
@@ -815,7 +847,7 @@
         "--loglevel=INFO",
         "--hostname=docprocessing@%n",
         "-Q",
-        "docprocessing"
+        "docprocessing,port"
       ],
       "presentation": {
         "group": "2",
@@ -891,7 +923,7 @@
         "up",
         "-d"
       ],
-      "cwd": "${workspaceFolder}/profiling",
+      "cwd": "${workspaceFolder}/tools/profiling",
       "console": "integratedTerminal",
       "presentation": {
         "group": "3"
