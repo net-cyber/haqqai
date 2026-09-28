@@ -308,7 +308,7 @@ def _construct_tools_impl(
                 except ValueError as e:
                     logger.error("Failed to initialize Internet Search Tool: %s", e)
                     raise ValueError(
-                        "Internet search tool requires a search provider API key, please contact your Onyx admin to get it added!"
+                        "Internet search tool requires a search provider API key, please contact your HaqqAI admin to get it added!"
                     )
 
             # Handle Open URL Tool
@@ -334,7 +334,7 @@ def _construct_tools_impl(
                 except RuntimeError as e:
                     logger.error("Failed to initialize Open URL Tool: %s", e)
                     raise ValueError(
-                        "Open URL tool requires a web content provider, please contact your Onyx admin to get it configured!"
+                        "Open URL tool requires a web content provider, please contact your HaqqAI admin to get it configured!"
                     )
 
             # Handle Python/Code Interpreter Tool

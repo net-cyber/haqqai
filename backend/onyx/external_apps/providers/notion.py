@@ -237,7 +237,7 @@ class NotionProvider(OAuthExternalAppProvider, OnyxManagedExtApp):
             ],
             setup_instructions=(
                 "In Notion: notion.so/my-integrations → New integration → set "
-                "type to Public. Under OAuth Domain & URIs, add this Onyx "
+                "type to Public. Under OAuth Domain & URIs, add this HaqqAI "
                 "instance's callback URL (/craft/v1/apps/oauth/callback) as a "
                 "Redirect URI. Configure the integration's capabilities (read "
                 "and/or write content). Save, then copy the OAuth Client ID and "

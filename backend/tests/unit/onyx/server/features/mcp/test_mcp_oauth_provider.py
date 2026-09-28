@@ -426,6 +426,6 @@ def test_noninteractive_provider_requires_reconnection() -> None:
 
     with pytest.raises(
         oauth.MCPReauthenticationRequired,
-        match="Please reconnect to the server through Onyx",
+        match="Please reconnect to the server through HaqqAI",
     ):
         asyncio.run(run())

@@ -82,7 +82,7 @@ def test_tool_discovery_reports_reauthentication_as_unauthenticated(
         api._list_mcp_tools_by_id(server.id, MagicMock(), True, user)
 
     assert exc_info.value.error_code is OnyxErrorCode.UNAUTHENTICATED
-    assert exc_info.value.detail == "Please reconnect to the server through Onyx."
+    assert exc_info.value.detail == "Please reconnect to the server through HaqqAI."
 
 
 def test_user_cannot_start_oauth_for_an_inaccessible_server(

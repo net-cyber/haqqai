@@ -174,7 +174,7 @@ def create_built_in_external_app(
     if MULTI_TENANT and get_onyx_managed_provider(request.app_type) is not None:
         raise OnyxError(
             OnyxErrorCode.INVALID_INPUT,
-            "Built-in apps are provided by Onyx; use PATCH /admin/apps/{id} to "
+            "Built-in apps are provided by HaqqAI; use PATCH /admin/apps/{id} to "
             "set action policies.",
         )
 
@@ -350,7 +350,7 @@ def delete_external_app_admin(
     if MULTI_TENANT and get_onyx_managed_provider(app.app_type) is not None:
         raise OnyxError(
             OnyxErrorCode.INVALID_INPUT,
-            "Built-in apps are provided by Onyx and cannot be deleted.",
+            "Built-in apps are provided by HaqqAI and cannot be deleted.",
         )
     affected: set[UUID] = set()
     for skill in get_skills_for_external_app(db_session, app.id):

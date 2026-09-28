@@ -194,7 +194,7 @@ class HubspotProvider(OAuthExternalAppProvider, OnyxManagedExtApp):
             ],
             setup_instructions=(
                 "In HubSpot: create a developer account, then Apps → Create app. "
-                "On the app's Auth tab, add this Onyx instance's callback URL "
+                "On the app's Auth tab, add this HaqqAI instance's callback URL "
                 "(/craft/v1/apps/oauth/callback) to the Redirect URLs and select "
                 "the CRM contacts, companies, and deals read/write scopes plus "
                 "the owners read scope. Save, then paste the Client ID and "

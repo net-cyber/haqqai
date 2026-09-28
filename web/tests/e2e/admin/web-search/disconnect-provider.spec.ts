@@ -307,7 +307,7 @@ test.describe("Web Search Provider Disconnect", () => {
       });
     });
 
-    test("should not show disconnect for Onyx Web Crawler (built-in)", async ({
+    test("should not show disconnect for HaqqAI Web Crawler (built-in)", async ({
       page,
     }) => {
       await mockWebSearchApis(page, [], []);
@@ -315,11 +315,11 @@ test.describe("Web Search Provider Disconnect", () => {
       await page.goto(WEB_SEARCH_URL);
       await page.waitForSelector("text=Web Crawler", { timeout: 20000 });
 
-      const onyxCard = findProviderCard(page, "Onyx Web Crawler");
+      const onyxCard = findProviderCard(page, "HaqqAI Web Crawler");
       await onyxCard.waitFor({ state: "visible", timeout: 10000 });
 
       const disconnectButton = onyxCard.getByRole("button", {
-        name: "Disconnect Onyx Web Crawler",
+        name: "Disconnect HaqqAI Web Crawler",
       });
       await expect(disconnectButton).not.toBeVisible();
     });

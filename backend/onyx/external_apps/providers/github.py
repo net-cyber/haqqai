@@ -258,7 +258,7 @@ class GitHubProvider(OAuthExternalAppProvider, OnyxManagedExtApp):
             ],
             setup_instructions=(
                 "In GitHub: Settings → Developer settings → OAuth Apps → New "
-                "OAuth App. Set the Authorization callback URL to this Onyx "
+                "OAuth App. Set the Authorization callback URL to this HaqqAI "
                 "instance's callback URL (/craft/v1/apps/oauth/callback). Save, "
                 "then generate a client secret. Paste the Client ID and Client "
                 "Secret below. The agent is granted the repo, read:org, and "

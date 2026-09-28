@@ -96,7 +96,7 @@ _SANDBOX_ERROR_MESSAGES: dict[SandboxProxyError, str] = {
     SandboxProxyError.DESTINATION_BLOCKED: (
         "This request targets an internal network address that sandboxes are not "
         "allowed to reach, so it was blocked before any connection was made. Only "
-        "the public internet and the Onyx API server are reachable from here. "
+        "the public internet and the HaqqAI API server are reachable from here. "
         "This is a fixed security boundary, not a transient error — do not retry "
         "against internal hosts (databases, caches, metadata endpoints, etc.)."
     ),

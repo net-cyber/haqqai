@@ -5,7 +5,7 @@ import re
 import socket
 from enum import Enum, auto
 
-ONYX_DEFAULT_APPLICATION_NAME = "Onyx"
+ONYX_DEFAULT_APPLICATION_NAME = "HaqqAI"
 ONYX_DISCORD_URL = "https://discord.gg/4NA5SbzrWb"
 ONYX_UTM_SOURCE = "onyx_app"
 SLACK_USER_TOKEN_PREFIX = "xoxp-"

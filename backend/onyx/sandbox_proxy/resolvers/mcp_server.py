@@ -121,7 +121,7 @@ class MCPServerResolver(CredentialResolver):
             raise CredentialUnavailableError(
                 str(e),
                 sandbox_detail=(
-                    "Multiple MCP servers in Onyx are configured with the same "
+                    "Multiple MCP servers in HaqqAI are configured with the same "
                     "URL, so Craft cannot tell which one's credentials to use. "
                     "Ask a workspace admin to remove the duplicate MCP server "
                     "configuration."
@@ -133,7 +133,7 @@ class MCPServerResolver(CredentialResolver):
                 f"request path {path!r} on MCP host {request.host} matches no "
                 "configured server_url prefix",
                 sandbox_detail=(
-                    "This host belongs to an MCP server configured in Onyx, but "
+                    "This host belongs to an MCP server configured in HaqqAI, but "
                     "the request path is outside the server's MCP endpoint, so "
                     "it was blocked. Only the configured MCP endpoint is "
                     "reachable on this host."
@@ -280,7 +280,7 @@ def _refresh_oauth_headers(
 def _fix_instruction(admin_managed: bool, *, reconnect: bool) -> str:
     verb = "reconnect" if reconnect else "connect"
     if admin_managed:
-        return f"Ask a workspace admin to {verb} it on the MCP actions page in Onyx."
+        return f"Ask a workspace admin to {verb} it on the MCP actions page in HaqqAI."
     return f"Ask the user to {verb} it from the Apps page in Craft, then retry."
 
 
