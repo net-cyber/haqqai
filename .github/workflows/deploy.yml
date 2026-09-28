@@ -68,6 +68,9 @@ jobs:
           username: ${{ secrets.ORACLE_USER }}
           key: ${{ secrets.ORACLE_SSH_KEY }}
           script: |
+            # Fail the job if any command fails
+            set -e
+
             # Fix permissions
             sudo chown -R ubuntu:ubuntu /home/ubuntu/haqqai/
 
