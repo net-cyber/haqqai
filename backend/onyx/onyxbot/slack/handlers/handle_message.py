@@ -38,7 +38,7 @@ logger_base = setup_logger()
 _SEAT_LIMIT_TEXT = (
     "We weren't able to respond because your organization "
     "has reached its user seat limit. Please contact your "
-    "Onyx administrator to add more seats."
+    "HaqqAI administrator to add more seats."
 )
 
 
@@ -325,12 +325,12 @@ def handle_message(
                         (
                             "We weren't able to respond because this workspace "
                             "is invite-only and your email has not been "
-                            "invited. Please ask your Onyx administrator for "
+                            "invited. Please ask your HaqqAI administrator for "
                             "an invite."
                             if e.error_code == OnyxErrorCode.UNAUTHORIZED
                             else "We weren't able to respond because your email "
                             "address is not allowed in this workspace. Please "
-                            "contact your Onyx administrator."
+                            "contact your HaqqAI administrator."
                         ),
                         ephemeral=True,
                     )
@@ -353,7 +353,7 @@ def handle_message(
                             "has reached its user seat limit. Since this is your "
                             "first time interacting with the bot, a new account "
                             "could not be created for you. Please contact your "
-                            "Onyx administrator to add more seats."
+                            "HaqqAI administrator to add more seats."
                         ),
                     )
 
@@ -383,7 +383,7 @@ def handle_message(
                             "has reached its user seat limit. Your account is "
                             "currently deactivated and cannot be reactivated "
                             "until more seats are available. Please contact "
-                            "your Onyx administrator."
+                            "your HaqqAI administrator."
                         ),
                     )
 

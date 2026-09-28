@@ -306,7 +306,7 @@ class TestHandleMessageSeatCheck:
 
         assert result is False
         assert "seat limit" in mock_respond.call_args[1]["text"]
-        assert "Onyx administrator" in mock_respond.call_args[1]["text"]
+        assert "HaqqAI administrator" in mock_respond.call_args[1]["text"]
 
     @pytest.mark.usefixtures("db_session")
     @patch(f"{_HANDLE_MSG}.handle_regular_answer", return_value=False)

@@ -1419,7 +1419,7 @@ def _get_ollama_available_model_names(api_base: str) -> set[str]:
         raise OnyxError(
             OnyxErrorCode.VALIDATION_ERROR,
             f"Could not reach an Ollama server at {api_base}. Check that the URL "
-            f"is correct and reachable from Onyx ({type(e).__name__}).",
+            f"is correct and reachable from HaqqAI ({type(e).__name__}).",
         )
     except Exception as e:
         raise OnyxError(
@@ -1900,7 +1900,7 @@ def _get_openai_compatible_models_response(
         raise OnyxError(
             OnyxErrorCode.VALIDATION_ERROR,
             f"Could not reach {source_name} at {url}. Check that the URL is "
-            f"correct and reachable from Onyx ({type(e).__name__}).",
+            f"correct and reachable from HaqqAI ({type(e).__name__}).",
         )
     except ValueError as e:
         logger.warning(

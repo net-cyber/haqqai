@@ -489,7 +489,7 @@ async def send_error_response(
     except discord.DiscordException:
         pass
 
-    error_msg = "Sorry, I encountered an error processing your message. You may want to contact Onyx for support :sweat_smile:"
+    error_msg = "Sorry, I encountered an error processing your message. You may want to contact HaqqAI for support :sweat_smile:"
 
     try:
         if isinstance(message.channel, discord.Thread):

@@ -37,7 +37,7 @@ def require_onyx_craft_enabled(
     if not is_craft_enabled_for_user(user):
         raise OnyxError(
             OnyxErrorCode.INSUFFICIENT_PERMISSIONS,
-            "Onyx Craft is not available",
+            "HaqqAI Craft is not available",
         )
     return user
 

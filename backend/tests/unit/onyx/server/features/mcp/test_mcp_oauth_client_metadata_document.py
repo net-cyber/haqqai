@@ -27,7 +27,7 @@ def test_mcp_oauth_client_metadata_document_is_public_and_cacheable(
     assert response.headers["Cache-Control"] == "public, max-age=3600"
     assert response.json() == {
         "client_id": f"{TEST_WEB_DOMAIN}/api/mcp/oauth/client-metadata",
-        "client_name": "Onyx",
+        "client_name": "HaqqAI",
         "redirect_uris": [f"{TEST_WEB_DOMAIN}/mcp/oauth/callback"],
         "grant_types": ["authorization_code", "refresh_token"],
         "response_types": ["code"],

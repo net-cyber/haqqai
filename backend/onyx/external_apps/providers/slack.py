@@ -164,7 +164,7 @@ class SlackProvider(OAuthExternalAppProvider, OnyxManagedExtApp):
             ],
             setup_instructions=(
                 "Create a Slack app at api.slack.com/apps. Under OAuth & "
-                "Permissions, add this Onyx instance's callback URL "
+                "Permissions, add this HaqqAI instance's callback URL "
                 "(/craft/v1/apps/oauth/callback) to Redirect URLs, and add the "
                 "User Token Scopes you want the agent to use (channels:history, "
                 "channels:read, chat:write, files:write, groups:history, "

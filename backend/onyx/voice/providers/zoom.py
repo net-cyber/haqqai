@@ -431,7 +431,7 @@ class ZoomVoiceProvider(VoiceProviderInterface):
 
     async def transcribe(self, audio_data: bytes, audio_format: str) -> str:
         if audio_format.lower() != "pcm16":
-            raise ValueError("Zoom Scribe only supports pcm16 audio in Onyx.")
+            raise ValueError("Zoom Scribe only supports pcm16 audio in HaqqAI.")
         if not self.api_key or not self.api_secret:
             raise ValueError("Zoom API key and API secret are required for STT.")
 
@@ -477,7 +477,7 @@ class ZoomVoiceProvider(VoiceProviderInterface):
         self, text: str, voice: str | None = None, speed: float = 1.0
     ) -> AsyncIterator[bytes]:
         _ = (text, voice, speed)
-        raise NotImplementedError("Zoom Scribe does not support TTS in Onyx.")
+        raise NotImplementedError("Zoom Scribe does not support TTS in HaqqAI.")
         yield b""
 
     async def validate_credentials(self) -> None:
@@ -527,7 +527,7 @@ class ZoomVoiceProvider(VoiceProviderInterface):
         self, audio_format: str = "pcm16"
     ) -> ZoomStreamingTranscriber:
         if audio_format.lower() != "pcm16":
-            raise ValueError("Zoom Scribe only supports pcm16 audio in Onyx.")
+            raise ValueError("Zoom Scribe only supports pcm16 audio in HaqqAI.")
         if not self.api_key or not self.api_secret:
             raise ValueError(
                 "Zoom API key and API secret are required for streaming STT."

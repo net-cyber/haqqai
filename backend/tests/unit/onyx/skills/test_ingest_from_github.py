@@ -137,7 +137,7 @@ def test_invalid_and_reserved_skills_do_not_block_valid_skills(
     )
     assert by_name["pptx"].bundle_bytes is None
     assert by_name["pptx"].unavailable_reason == (
-        "A built-in Onyx skill already uses this name."
+        "A built-in HaqqAI skill already uses this name."
     )
 
 

@@ -75,7 +75,7 @@ def test_import_creates_conflicting_skills_disabled_without_blocking_others(
             name="pptx",
             description="Presentations",
             bundle_bytes=None,
-            unavailable_reason="A built-in Onyx skill already uses this name.",
+            unavailable_reason="A built-in HaqqAI skill already uses this name.",
         ),
     ]
     monkeypatch.setattr(
@@ -119,7 +119,7 @@ def test_import_creates_conflicting_skills_disabled_without_blocking_others(
     assert imported_by_name[unique_name].skill.enabled is True
     assert imported_by_name[unique_name].disabled_reason is None
     assert [(item.name, item.reason) for item in response.not_imported] == [
-        ("pptx", "A built-in Onyx skill already uses this name.")
+        ("pptx", "A built-in HaqqAI skill already uses this name.")
     ]
     assert pushed_user_ids == [{test_user.id}]
 

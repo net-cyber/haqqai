@@ -109,7 +109,7 @@ class DrupalWikiConnector(
             raise ConnectorValidationError(
                 f"Outdated Drupal Wiki connector configuration detected "
                 f"(found deprecated parameters: {', '.join(deprecated_found)}). "
-                f"Please delete and recreate this connector, or contact Onyx support "
+                f"Please delete and recreate this connector, or contact HaqqAI support "
                 f"for assistance with updating the configuration without deleting the connector."
             )
         # Reject any other unexpected parameters

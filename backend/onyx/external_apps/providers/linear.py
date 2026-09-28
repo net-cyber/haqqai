@@ -137,7 +137,7 @@ class LinearProvider(OAuthExternalAppProvider, OnyxManagedExtApp):
             setup_instructions=(
                 "In Linear: Settings → API → OAuth applications → New OAuth "
                 "application. Fill in name, developer email, and description. "
-                "Add this Onyx instance's callback URL "
+                "Add this HaqqAI instance's callback URL "
                 "(/craft/v1/apps/oauth/callback) to Callback URLs. Save. Then "
                 "paste the Client ID and Client Secret below. The agent will "
                 "be granted read+write access to issues, projects, and comments."

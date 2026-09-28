@@ -49,7 +49,7 @@ def _setup_instructions(google_api_name: str) -> str:
         f"{google_api_name} under APIs & Services → Library, configure the "
         "OAuth consent screen (External for personal Google accounts, Internal "
         "for Workspace), then under APIs & Services → Credentials create an "
-        "OAuth 2.0 Client ID of type Web application. Add this Onyx instance's "
+        "OAuth 2.0 Client ID of type Web application. Add this HaqqAI instance's "
         "callback URL (/craft/v1/apps/oauth/callback) to Authorized redirect "
         "URIs. Then paste the Client ID and Client Secret below."
     )
