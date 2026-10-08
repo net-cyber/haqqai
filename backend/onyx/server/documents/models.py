@@ -797,10 +797,46 @@ class GoogleServiceAccountCredentialRequest(BaseModel):
     service_account_key: GoogleServiceAccountKey
 
 
+class SplitSummary(BaseModel):
+    """How one uploaded source file was split into per-article files."""
+
+    source_name: str
+    # The profile that was applied; "auto" is resolved, "none" means not split.
+    profile: str
+    unit_count: int
+    warnings: list[str]
+
+
 class FileUploadResponse(BaseModel):
     file_paths: list[str]
     file_names: list[str]
     zip_metadata_file_id: str | None  # File ID pointing to metadata in file store
+    # Set when a split profile was requested; one entry per splittable source file.
+    split_summary: list[SplitSummary] | None = None
+
+
+class SplitPreviewUnit(BaseModel):
+    unit_id: str
+    display_name: str
+    unit_type: str
+    chars: int
+
+
+class SplitPreviewSource(BaseModel):
+    source_name: str
+    splittable: bool
+    profile: str
+    # All units, including the front matter.
+    unit_count: int
+    # Units without the front matter.
+    article_count: int
+    # The first units only.
+    units: list[SplitPreviewUnit]
+    warnings: list[str]
+
+
+class SplitPreviewResponse(BaseModel):
+    sources: list[SplitPreviewSource]
 
 
 class ConnectorFileInfo(BaseModel):
@@ -808,6 +844,25 @@ class ConnectorFileInfo(BaseModel):
     file_name: str
     file_size: int | None = None
     upload_date: str | None = None
+    document_id: str | None = None
+    editable: bool = False
+    # Set on files created by splitting a larger source file.
+    parent_file_name: str | None = None
+    unit_id: str | None = None
+    unit_type: str | None = None
+    unit_title: str | None = None
+
+
+class ConnectorFileContentResponse(BaseModel):
+    file_id: str
+    file_name: str
+    # File text without the ONYX_METADATA header line.
+    content: str
+    metadata: dict[str, str]
+
+
+class ConnectorFileContentUpdateRequest(BaseModel):
+    content: str
 
 
 class ConnectorFilesResponse(BaseModel):

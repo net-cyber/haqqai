@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@opal/components";
+import { Button, InputSingleSelect, Text as OpalText } from "@opal/components";
 import {
   Table,
   TableBody,
@@ -13,9 +13,16 @@ import {
 } from "@/components/ui/table";
 import { InputCheckbox } from "@opal/components";
 import {
+  isSplitProfile,
   updateConnectorFiles,
   type ConnectorFileInfo,
+  type SplitProfile,
 } from "@/lib/fileConnector";
+import {
+  useSplitProfileOptions,
+  useSplitSummaryToast,
+} from "@/lib/legalSplit/hooks";
+import ConnectorFileEditorModal from "@/app/admin/connector/[ccPairId]/ConnectorFileEditorModal";
 import { toast } from "@opal/layouts";
 import useSWR from "swr";
 import { errorHandlingFetcher } from "@/lib/fetcher";
@@ -24,7 +31,10 @@ import { Modal } from "@opal/components";
 import Text from "@/refresh-components/texts/Text";
 import {
   SvgCheck,
+  SvgChevronDown,
+  SvgChevronRight,
   SvgEdit,
+  SvgFileText,
   SvgFolderPlus,
   SvgPlusCircle,
   SvgX,
@@ -37,11 +47,35 @@ interface InlineFileManagementProps {
   onRefresh: () => void;
 }
 
+/** Files split from the same source file, in listing order. */
+function groupBySource(
+  files: ConnectorFileInfo[]
+): [string, ConnectorFileInfo[]][] {
+  const groups = new Map<string, ConnectorFileInfo[]>();
+  files.forEach((file) => {
+    if (!file.parent_file_name) {
+      return;
+    }
+    const group = groups.get(file.parent_file_name) ?? [];
+    group.push(file);
+    groups.set(file.parent_file_name, group);
+  });
+  return Array.from(groups.entries());
+}
+
 export default function InlineFileManagement({
   connectorId,
   onRefresh,
 }: InlineFileManagementProps) {
   const t = useTranslations("admin.connector");
+  const tSplit = useTranslations("admin.legalSplit");
+  const { options: splitOptions } = useSplitProfileOptions();
+  const showSplitSummary = useSplitSummaryToast();
+  const [splitProfile, setSplitProfile] = useState<SplitProfile>("none");
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [editingFile, setEditingFile] = useState<ConnectorFileInfo | null>(
+    null
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [selectedFilesToRemove, setSelectedFilesToRemove] = useState<
     Set<string>
@@ -80,6 +114,33 @@ export default function InlineFileManagement({
     setFilesToAdd((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const toggleGroup = (source: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(source)) {
+        next.delete(source);
+      } else {
+        next.add(source);
+      }
+      return next;
+    });
+  };
+
+  const toggleGroupForRemoval = (groupFiles: ConnectorFileInfo[]) => {
+    setSelectedFilesToRemove((prev) => {
+      const next = new Set(prev);
+      const allSelected = groupFiles.every((file) => next.has(file.file_id));
+      groupFiles.forEach((file) => {
+        if (allSelected) {
+          next.delete(file.file_id);
+        } else {
+          next.add(file.file_id);
+        }
+      });
+      return next;
+    });
+  };
+
   const toggleFileForRemoval = (fileId: string) => {
     setSelectedFilesToRemove((prev) => {
       const newSet = new Set(prev);
@@ -111,18 +172,21 @@ export default function InlineFileManagement({
     setShowSaveConfirm(false);
     setIsSaving(true);
     try {
-      await updateConnectorFiles(
+      const result = await updateConnectorFiles(
         connectorId,
         Array.from(selectedFilesToRemove),
-        filesToAdd
+        filesToAdd,
+        splitProfile
       );
 
       toast.success(t("fileManagement.toasts.filesUpdated"));
+      showSplitSummary(result.split_summary);
 
       // Reset editing state
       setIsEditing(false);
       setSelectedFilesToRemove(new Set());
       setFilesToAdd([]);
+      setSplitProfile("none");
 
       // Refresh data
       refreshFiles();
@@ -142,6 +206,7 @@ export default function InlineFileManagement({
     setIsEditing(false);
     setSelectedFilesToRemove(new Set());
     setFilesToAdd([]);
+    setSplitProfile("none");
   };
 
   if (isLoading) {
@@ -164,6 +229,59 @@ export default function InlineFileManagement({
     (file) => !selectedFilesToRemove.has(file.file_id)
   );
   const totalFiles = currentFiles.length + filesToAdd.length;
+  const standaloneFiles = files.filter((file) => !file.parent_file_name);
+  const fileGroups = groupBySource(files);
+
+  const renderFileRow = (file: ConnectorFileInfo, nested: boolean) => {
+    const isMarkedForRemoval = selectedFilesToRemove.has(file.file_id);
+    return (
+      <TableRow
+        key={file.file_id}
+        className={isMarkedForRemoval ? "bg-red-100 dark:bg-red-900/20" : ""}
+      >
+        {isEditing && (
+          <TableCell>
+            <InputCheckbox
+              checked={isMarkedForRemoval}
+              onCheckedChange={() => toggleFileForRemoval(file.file_id)}
+            />
+          </TableCell>
+        )}
+        <TableCell className={nested ? "font-medium ps-10" : "font-medium"}>
+          <span className={isMarkedForRemoval ? "line-through opacity-60" : ""}>
+            {file.file_name}
+          </span>
+          {isMarkedForRemoval && (
+            <span className="ms-2 text-xs font-semibold text-red-600 dark:text-red-400">
+              {t("fileManagement.removingBadge.label")}
+            </span>
+          )}
+        </TableCell>
+        <TableCell
+          className={isMarkedForRemoval ? "line-through opacity-60" : ""}
+        >
+          {formatBytes(file.file_size)}
+        </TableCell>
+        <TableCell
+          className={isMarkedForRemoval ? "line-through opacity-60" : ""}
+        >
+          {file.upload_date ? timestampToReadableDate(file.upload_date) : "-"}
+        </TableCell>
+        <TableCell>
+          {!isEditing && file.editable && (
+            <Button
+              icon={SvgFileText}
+              prominence="tertiary"
+              size="sm"
+              onClick={() => setEditingFile(file)}
+              tooltip={t("fileManagement.editContentButton.tooltip")}
+              title={t("fileManagement.editContentButton.tooltip")}
+            />
+          )}
+        </TableCell>
+      </TableRow>
+    );
+  };
 
   return (
     <>
@@ -226,67 +344,65 @@ export default function InlineFileManagement({
                   <TableHead>
                     {t("fileManagement.columns.uploadDate")}
                   </TableHead>
-                  {isEditing && <TableHead className="w-12"></TableHead>}
+                  <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {/* Existing files */}
-                {files.map((file) => {
-                  const isMarkedForRemoval = selectedFilesToRemove.has(
-                    file.file_id
+                {/* Files uploaded as they are */}
+                {standaloneFiles.map((file) => renderFileRow(file, false))}
+
+                {/* Files split from one legal source file */}
+                {fileGroups.map(([source, groupFiles]) => {
+                  const isExpanded = expandedGroups.has(source);
+                  const allMarked = groupFiles.every((file) =>
+                    selectedFilesToRemove.has(file.file_id)
                   );
-                  return (
-                    <TableRow
-                      key={file.file_id}
-                      className={
-                        isMarkedForRemoval
-                          ? "bg-red-100 dark:bg-red-900/20"
-                          : ""
-                      }
-                    >
+                  return [
+                    <TableRow key={`group-${source}`}>
                       {isEditing && (
                         <TableCell>
                           <InputCheckbox
-                            checked={isMarkedForRemoval}
+                            checked={allMarked}
                             onCheckedChange={() =>
-                              toggleFileForRemoval(file.file_id)
+                              toggleGroupForRemoval(groupFiles)
                             }
                           />
                         </TableCell>
                       )}
-                      <TableCell className="font-medium">
-                        <span
-                          className={
-                            isMarkedForRemoval ? "line-through opacity-60" : ""
-                          }
-                        >
-                          {file.file_name}
-                        </span>
-                        {isMarkedForRemoval && (
-                          <span className="ms-2 text-xs font-semibold text-red-600 dark:text-red-400">
-                            {t("fileManagement.removingBadge.label")}
-                          </span>
-                        )}
+                      <TableCell colSpan={3}>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            icon={isExpanded ? SvgChevronDown : SvgChevronRight}
+                            prominence="tertiary"
+                            size="sm"
+                            onClick={() => toggleGroup(source)}
+                            tooltip={
+                              isExpanded
+                                ? t("fileManagement.groups.collapse")
+                                : t("fileManagement.groups.expand")
+                            }
+                            title={
+                              isExpanded
+                                ? t("fileManagement.groups.collapse")
+                                : t("fileManagement.groups.expand")
+                            }
+                          />
+                          <OpalText font="main-ui-action" color="text-04">
+                            {source}
+                          </OpalText>
+                          <OpalText font="secondary-body" color="text-03">
+                            {t("fileManagement.groups.fileCount", {
+                              count: groupFiles.length,
+                            })}
+                          </OpalText>
+                        </div>
                       </TableCell>
-                      <TableCell
-                        className={
-                          isMarkedForRemoval ? "line-through opacity-60" : ""
-                        }
-                      >
-                        {formatBytes(file.file_size)}
-                      </TableCell>
-                      <TableCell
-                        className={
-                          isMarkedForRemoval ? "line-through opacity-60" : ""
-                        }
-                      >
-                        {file.upload_date
-                          ? timestampToReadableDate(file.upload_date)
-                          : "-"}
-                      </TableCell>
-                      {isEditing && <TableCell></TableCell>}
-                    </TableRow>
-                  );
+                      <TableCell />
+                    </TableRow>,
+                    ...(isExpanded
+                      ? groupFiles.map((file) => renderFileRow(file, true))
+                      : []),
+                  ];
                 })}
 
                 {/* New files to be added */}
@@ -316,7 +432,7 @@ export default function InlineFileManagement({
                     </TableCell>
                     <TableCell>{formatBytes(file.size)}</TableCell>
                     <TableCell>-</TableCell>
-                    {isEditing && <TableCell></TableCell>}
+                    <TableCell></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -327,25 +443,50 @@ export default function InlineFileManagement({
 
       {/* Add Files Button (only in edit mode) */}
       {isEditing && (
-        <div className="mt-4">
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            onChange={handleFileSelect}
-            className="hidden"
-            id={`file-upload-${connectorId}`}
-          />
-          <Button
-            disabled={isSaving}
-            prominence="secondary"
-            onClick={() => fileInputRef.current?.click()}
-            icon={SvgPlusCircle}
-          >
-            {t("fileManagement.addFilesButton.label")}
-          </Button>
+        <div className="mt-4 flex flex-col gap-3">
+          <div className="flex max-w-md flex-col gap-1">
+            <OpalText font="main-ui-action" color="text-04">
+              {tSplit("selector.label")}
+            </OpalText>
+            <InputSingleSelect
+              value={splitProfile}
+              onValueChange={(value) =>
+                setSplitProfile(isSplitProfile(value) ? value : "none")
+              }
+              placeholder={tSplit("selector.placeholder")}
+              options={splitOptions}
+            />
+          </div>
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              onChange={handleFileSelect}
+              className="hidden"
+              id={`file-upload-${connectorId}`}
+            />
+            <Button
+              disabled={isSaving}
+              prominence="secondary"
+              onClick={() => fileInputRef.current?.click()}
+              icon={SvgPlusCircle}
+            >
+              {t("fileManagement.addFilesButton.label")}
+            </Button>
+          </div>
         </div>
       )}
+
+      <ConnectorFileEditorModal
+        connectorId={connectorId}
+        file={editingFile}
+        onClose={() => setEditingFile(null)}
+        onSaved={() => {
+          refreshFiles();
+          onRefresh();
+        }}
+      />
 
       {/* Confirmation Modal */}
       <Modal open={showSaveConfirm} onOpenChange={setShowSaveConfirm}>

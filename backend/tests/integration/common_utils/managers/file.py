@@ -74,17 +74,68 @@ class FileManager:
         files: List[Tuple[str, bytes]],
         user_performing_action: DATestUser,
         content_type: str = "application/octet-stream",
+        split_profile: str | None = None,
     ) -> httpx.Response:
         """Raw response, so a permission test can assert a denial instead of raising."""
         headers = user_performing_action.headers.copy()
         headers.pop("Content-Type", None)
+        parts: List[Tuple[str, Any]] = [
+            ("files", (file_name, io.BytesIO(content), content_type))
+            for file_name, content in files
+        ]
+        if split_profile is not None:
+            parts.append(("split_profile", (None, split_profile)))
         return client.post(
             f"{API_SERVER_URL}/manage/admin/connector/file/upload",
-            files=[
-                ("files", (file_name, io.BytesIO(content), content_type))
-                for file_name, content in files
-            ],
+            files=parts,
             headers=headers,
+            cookies=user_performing_action.cookies,
+        )
+
+    @staticmethod
+    def preview_connector_file_split(
+        files: List[Tuple[str, bytes]],
+        user_performing_action: DATestUser,
+        split_profile: str = "auto",
+        content_type: str = "text/markdown",
+    ) -> httpx.Response:
+        headers = user_performing_action.headers.copy()
+        headers.pop("Content-Type", None)
+        parts: List[Tuple[str, Any]] = [
+            ("files", (file_name, io.BytesIO(content), content_type))
+            for file_name, content in files
+        ]
+        parts.append(("split_profile", (None, split_profile)))
+        return client.post(
+            f"{API_SERVER_URL}/manage/admin/connector/file/split-preview",
+            files=parts,
+            headers=headers,
+            cookies=user_performing_action.cookies,
+        )
+
+    @staticmethod
+    def get_connector_file_content(
+        connector_id: int,
+        file_id: str,
+        user_performing_action: DATestUser,
+    ) -> httpx.Response:
+        return client.get(
+            f"{API_SERVER_URL}/manage/admin/connector/{connector_id}/files/{file_id}/content",
+            headers=user_performing_action.headers,
+            cookies=user_performing_action.cookies,
+        )
+
+    @staticmethod
+    def update_connector_file_content(
+        connector_id: int,
+        file_id: str,
+        content: str,
+        user_performing_action: DATestUser,
+    ) -> httpx.Response:
+        return client.put(
+            f"{API_SERVER_URL}/manage/admin/connector/{connector_id}/files/{file_id}/content",
+            json={"content": content},
+            headers=user_performing_action.headers,
             cookies=user_performing_action.cookies,
         )
 
@@ -140,6 +191,7 @@ class FileManager:
         file_ids_to_remove: List[str] | None = None,
         files: List[Tuple[str, bytes]] | None = None,
         content_type: str = "application/octet-stream",
+        split_profile: str | None = None,
     ) -> httpx.Response:
         headers = user_performing_action.headers.copy()
         headers.pop("Content-Type", None)
@@ -152,6 +204,8 @@ class FileManager:
             ("files", (file_name, io.BytesIO(content), content_type))
             for file_name, content in (files or [])
         )
+        if split_profile is not None:
+            parts.append(("split_profile", (None, split_profile)))
         return client.post(
             f"{API_SERVER_URL}/manage/admin/connector/{connector_id}/files/update",
             files=parts,

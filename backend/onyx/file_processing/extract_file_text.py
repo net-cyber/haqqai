@@ -832,6 +832,10 @@ def extract_file_text_locally(
     raise ValueError("Unknown file extension or not recognized as text data")
 
 
+# Text files whose first line may carry an ONYX_METADATA header.
+_METADATA_HEADER_EXTENSIONS = {".txt", ".md", ".mdx"}
+
+
 class ExtractionResult(NamedTuple):
     """Structured result from text and image extraction from various file types."""
 
@@ -899,6 +903,18 @@ def _extract_text_and_images(
 ) -> ExtractionResult:
     file.seek(0)
 
+    # When we upload a document via a connector or MyDocuments, we extract and store the content of files
+    # with content types in UploadMimeTypes.DOCUMENT_MIME_TYPES as plain text files.
+    # As a result, the file name extension may differ from the original content type.
+    # We process files with a plain text content type first to handle this scenario.
+    # Plain text and markdown skip Unstructured, which gains nothing on them and
+    # would drop the first-line ONYX_METADATA header.
+    if (
+        content_type in OnyxMimeTypes.TEXT_MIME_TYPES
+        or get_file_ext(file_name) in _METADATA_HEADER_EXTENSIONS
+    ):
+        return extract_result_from_text_file(file)
+
     if get_unstructured_api_key():
         try:
             text_content = unstructured_to_text(file, file_name)
@@ -911,13 +927,6 @@ def _extract_text_and_images(
                 str(e),
             )
             file.seek(0)  # Reset file pointer just in case
-
-    # When we upload a document via a connector or MyDocuments, we extract and store the content of files
-    # with content types in UploadMimeTypes.DOCUMENT_MIME_TYPES as plain text files.
-    # As a result, the file name extension may differ from the original content type.
-    # We process files with a plain text content type first to handle this scenario.
-    if content_type in OnyxMimeTypes.TEXT_MIME_TYPES:
-        return extract_result_from_text_file(file)
 
     # Default processing
     try:

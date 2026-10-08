@@ -1913,8 +1913,28 @@
         "editButton": {
           "label": "編集"
         },
+        "editContentButton": {
+          "tooltip": "テキストを編集"
+        },
+        "editModal": {
+          "cancel": "キャンセル",
+          "description": "保存するとテキストが置き換えられ、このドキュメントが再インデックスされます。IDと引用は変わりません。",
+          "emptyError": "テキストを空にすることはできません。",
+          "loadError": "ファイルを読み込めませんでした: {message}",
+          "placeholder": "ファイルのテキスト",
+          "save": "保存して再インデックス",
+          "saveFailed": "ファイルを保存できませんでした: {message}",
+          "saved": "保存しました。再インデックスを開始しました。",
+          "saving": "保存しています…",
+          "title": "{fileName} を編集"
+        },
         "empty": {
           "description": "このコネクターにファイルはありません"
+        },
+        "groups": {
+          "collapse": "ファイルを隠す",
+          "expand": "ファイルを表示",
+          "fileCount": "{count, plural, other {#件のファイル}}"
         },
         "header": {
           "title": "ファイル（{count, plural, one {# 件} other {# 件}}）"
@@ -8360,6 +8380,49 @@
           "label": "API ベース URL",
           "description": "Firecrawl API のベース URL。"
         }
+      }
+    },
+    "legalSplit": {
+      "createdToast": "{sources, plural, other {#件の法令ファイル}}から{files, plural, other {#件のファイル}}を作成しました",
+      "keptWholeToast": "{source} は1つのファイルとして保存されました。条文や判決が見つかりませんでした",
+      "preview": {
+        "button": "分割をプレビュー",
+        "failed": "分割をプレビューできませんでした: {message}",
+        "loading": "ファイルを読み込んでいます…",
+        "moreUnits": "…ほか{count, plural, other {#件}}",
+        "noFiles": "先にファイルを選択してください。",
+        "notSplit": "{source}: 条文や判決が見つかりません。ファイルは分割されません。",
+        "split": "{source}: {profile}として{count, plural, other {#件のファイル}}",
+        "title": "分割のプレビュー",
+        "unsupported": "{source}: このファイル形式は分割されません。",
+        "warnings": "{count, plural, other {#件の警告}}"
+      },
+      "profiles": {
+        "auto": {
+          "description": "テキストから構成を検出します",
+          "label": "自動検出"
+        },
+        "cassation": {
+          "description": "事件番号の行ごとに区切り、判決ごとに1ファイル",
+          "label": "破棄審の判決"
+        },
+        "civilCode": {
+          "description": "ቍで始まる条文行ごとに1ファイル",
+          "label": "民法典の条文"
+        },
+        "none": {
+          "description": "各ファイルを1つのドキュメントとしてインデックス化",
+          "label": "分割しない"
+        },
+        "proclamation": {
+          "description": "አንቀጽ の条文ごとに1ファイル。章と節の情報付き",
+          "label": "布告の条文"
+        }
+      },
+      "selector": {
+        "description": ".md、.txt、.docx ファイルの条文や判決をそれぞれ別のファイルとして保存し、検索結果で2つの条文が混ざらないようにします。",
+        "label": "法令ファイルを分割",
+        "placeholder": "分割プロファイルを選択"
       }
     }
   },

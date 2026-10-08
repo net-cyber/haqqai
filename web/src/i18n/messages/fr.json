@@ -1913,8 +1913,28 @@
         "editButton": {
           "label": "Modifier"
         },
+        "editContentButton": {
+          "tooltip": "Modifier le texte"
+        },
+        "editModal": {
+          "cancel": "Annuler",
+          "description": "L’enregistrement remplace le texte et réindexe ce document. Son identifiant et ses citations restent les mêmes.",
+          "emptyError": "Le texte ne doit pas être vide.",
+          "loadError": "Impossible de charger le fichier : {message}",
+          "placeholder": "Texte du fichier",
+          "save": "Enregistrer et réindexer",
+          "saveFailed": "Impossible d’enregistrer le fichier : {message}",
+          "saved": "Enregistré. Réindexation lancée.",
+          "saving": "Enregistrement…",
+          "title": "Modifier {fileName}"
+        },
         "empty": {
           "description": "Aucun fichier dans ce connecteur"
+        },
+        "groups": {
+          "collapse": "Masquer les fichiers",
+          "expand": "Afficher les fichiers",
+          "fileCount": "{count, plural, one {# fichier} other {# fichiers}}"
         },
         "header": {
           "title": "Fichiers ({count, plural, one {# fichier} other {# fichiers}})"
@@ -8360,6 +8380,49 @@
           "label": "URL de base de l'API",
           "description": "L'URL de base de votre API Firecrawl."
         }
+      }
+    },
+    "legalSplit": {
+      "createdToast": "{files, plural, one {# fichier créé} other {# fichiers créés}} à partir de {sources, plural, one {# fichier juridique} other {# fichiers juridiques}}",
+      "keptWholeToast": "{source} a été enregistré comme un seul fichier : aucun article ni aucune décision trouvés",
+      "preview": {
+        "button": "Aperçu du découpage",
+        "failed": "Impossible d’afficher l’aperçu du découpage : {message}",
+        "loading": "Lecture des fichiers…",
+        "moreUnits": "…et {count, plural, one {# autre} other {# autres}}",
+        "noFiles": "Sélectionnez d’abord un fichier.",
+        "notSplit": "{source} : aucun article ni aucune décision trouvés. Le fichier reste entier.",
+        "split": "{source} : {count, plural, one {# fichier} other {# fichiers}} en tant que {profile}",
+        "title": "Aperçu du découpage",
+        "unsupported": "{source} : ce type de fichier n’est pas découpé.",
+        "warnings": "{count, plural, one {# avertissement} other {# avertissements}}"
+      },
+      "profiles": {
+        "auto": {
+          "description": "Détecter la structure à partir du texte",
+          "label": "Détection automatique"
+        },
+        "cassation": {
+          "description": "Un fichier par décision de cassation, découpé à chaque ligne de numéro de dossier",
+          "label": "Décisions de cassation"
+        },
+        "civilCode": {
+          "description": "Un fichier par ligne d’article commençant par ቍ",
+          "label": "Articles du Code civil"
+        },
+        "none": {
+          "description": "Indexer chaque fichier comme un seul document",
+          "label": "Ne pas découper"
+        },
+        "proclamation": {
+          "description": "Un fichier par article አንቀጽ, avec le contexte du chapitre et de la section",
+          "label": "Articles de proclamation"
+        }
+      },
+      "selector": {
+        "description": "Enregistre chaque article ou décision de justice d’un fichier .md, .txt ou .docx comme un fichier distinct, pour que les résultats de recherche ne mélangent jamais deux articles.",
+        "label": "Découper les fichiers juridiques",
+        "placeholder": "Choisissez un profil de découpage"
       }
     }
   },

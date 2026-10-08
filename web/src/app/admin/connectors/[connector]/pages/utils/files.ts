@@ -2,21 +2,24 @@ import { toast } from "@opal/layouts";
 import { createConnector, runConnector } from "@/lib/connector";
 import { createCredential, linkCredential } from "@/lib/credential";
 import type { ErrorResponseBody } from "@/lib/fetcher";
-import type { FileUploadResponse } from "@/lib/fileConnector";
+import type { FileUploadResponse, SplitProfile } from "@/lib/fileConnector";
 import { FileConfig } from "@/lib/connectors/connectors";
 import { AccessType, ValidSources } from "@/lib/types";
 
+/** Upload files and create a File connector. Returns the upload result, or null on failure. */
 export const submitFiles = async (
   selectedFiles: File[],
   name: string,
   access_type: string,
-  groups?: number[]
-) => {
+  groups?: number[],
+  splitProfile: SplitProfile = "none"
+): Promise<FileUploadResponse | null> => {
   const formData = new FormData();
 
   selectedFiles.forEach((file) => {
     formData.append("files", file);
   });
+  formData.append("split_profile", splitProfile);
 
   const response = await fetch("/api/manage/admin/connector/file/upload", {
     method: "POST",
@@ -26,7 +29,7 @@ export const submitFiles = async (
     await response.json();
   if (!response.ok) {
     toast.error(`Unable to upload files - ${responseJson.detail}`);
-    return;
+    return null;
   }
 
   const filePaths = responseJson.file_paths as string[];
@@ -50,7 +53,7 @@ export const submitFiles = async (
   });
   if (connectorErrorMsg || !connector) {
     toast.error(`Unable to create connector - ${connectorErrorMsg}`);
-    return;
+    return null;
   }
 
   // Since there is no "real" credential associated with a file connector
@@ -68,7 +71,7 @@ export const submitFiles = async (
   if (!createCredentialResponse.ok) {
     const errorMsg = await createCredentialResponse.text();
     toast.error(`Error creating credential for CC Pair - ${errorMsg}`);
-    return false;
+    return null;
   }
   const credentialId = (await createCredentialResponse.json()).id;
 
@@ -85,15 +88,20 @@ export const submitFiles = async (
     toast.error(
       `Unable to link connector to credential - ${credentialResponseJson.detail}`
     );
-    return false;
+    return null;
   }
 
   const runConnectorErrorMsg = await runConnector(connector.id, [0]);
   if (runConnectorErrorMsg) {
     toast.error(`Unable to run connector - ${runConnectorErrorMsg}`);
-    return false;
+    return null;
   }
 
   toast.success("Successfully uploaded files!");
-  return true;
+  return {
+    file_paths: filePaths,
+    file_names: fileNames,
+    zip_metadata_file_id: zipMetadataFileId,
+    split_summary: responseJson.split_summary ?? null,
+  };
 };

@@ -1913,8 +1913,28 @@
         "editButton": {
           "label": "تعديل"
         },
+        "editContentButton": {
+          "tooltip": "تعديل النص"
+        },
+        "editModal": {
+          "cancel": "إلغاء",
+          "description": "يؤدي الحفظ إلى استبدال النص وإعادة فهرسة هذا المستند. يبقى معرّفه واستشهاداته كما هي.",
+          "emptyError": "لا يمكن أن يكون النص فارغًا.",
+          "loadError": "تعذّر تحميل الملف: {message}",
+          "placeholder": "نص الملف",
+          "save": "حفظ وإعادة الفهرسة",
+          "saveFailed": "تعذّر حفظ الملف: {message}",
+          "saved": "تم الحفظ. بدأت إعادة الفهرسة.",
+          "saving": "جارٍ الحفظ…",
+          "title": "تعديل {fileName}"
+        },
         "empty": {
           "description": "لا توجد ملفات في هذا الموصل"
+        },
+        "groups": {
+          "collapse": "إخفاء الملفات",
+          "expand": "عرض الملفات",
+          "fileCount": "{count, plural, one {ملف واحد} other {# ملفات}}"
         },
         "header": {
           "title": "الملفات ({count, plural, one {# ملف} other {# ملفات}})"
@@ -8360,6 +8380,49 @@
           "label": "عنوان URL الأساسي لواجهة API",
           "description": "عنوان URL الأساسي لواجهة Firecrawl API الخاصة بك."
         }
+      }
+    },
+    "legalSplit": {
+      "createdToast": "تم إنشاء {files, plural, one {ملف واحد} other {# ملفات}} من {sources, plural, one {ملف قانوني واحد} other {# ملفات قانونية}}",
+      "keptWholeToast": "تم حفظ {source} كملف واحد: لم يتم العثور على مواد أو قرارات",
+      "preview": {
+        "button": "معاينة التقسيم",
+        "failed": "تعذّرت معاينة التقسيم: {message}",
+        "loading": "جارٍ قراءة الملفات…",
+        "moreUnits": "…و{count, plural, one {واحد آخر} other {# أخرى}}",
+        "noFiles": "اختر ملفًا أولًا.",
+        "notSplit": "{source}: لم يتم العثور على مواد أو قرارات. يبقى الملف كاملًا.",
+        "split": "{source}: {count, plural, one {ملف واحد} other {# ملفات}} بصيغة {profile}",
+        "title": "معاينة التقسيم",
+        "unsupported": "{source}: لا يتم تقسيم هذا النوع من الملفات.",
+        "warnings": "{count, plural, one {تحذير واحد} other {# تحذيرات}}"
+      },
+      "profiles": {
+        "auto": {
+          "description": "اكتشاف البنية من النص",
+          "label": "اكتشاف تلقائي"
+        },
+        "cassation": {
+          "description": "ملف لكل قرار نقض، مع التقسيم عند كل سطر رقم القضية",
+          "label": "قرارات النقض"
+        },
+        "civilCode": {
+          "description": "ملف لكل سطر مادة يبدأ بـ ቍ",
+          "label": "مواد القانون المدني"
+        },
+        "none": {
+          "description": "فهرسة كل ملف كمستند واحد",
+          "label": "بدون تقسيم"
+        },
+        "proclamation": {
+          "description": "ملف لكل مادة አንቀጽ مع سياق الفصل والقسم",
+          "label": "مواد الإعلان"
+        }
+      },
+      "selector": {
+        "description": "يحفظ كل مادة أو قرار قضائي في ملف ‎.md أو ‎.txt أو ‎.docx كملف مستقل، حتى لا تخلط نتائج البحث بين مادتين.",
+        "label": "تقسيم الملفات القانونية",
+        "placeholder": "اختر طريقة التقسيم"
       }
     }
   },

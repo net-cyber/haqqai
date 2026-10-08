@@ -1913,8 +1913,28 @@
         "editButton": {
           "label": "Editar"
         },
+        "editContentButton": {
+          "tooltip": "Editar texto"
+        },
+        "editModal": {
+          "cancel": "Cancelar",
+          "description": "Salvar substitui o texto e reindexa este documento. O ID e as citações continuam os mesmos.",
+          "emptyError": "O texto não pode ficar vazio.",
+          "loadError": "Não foi possível carregar o arquivo: {message}",
+          "placeholder": "Texto do arquivo",
+          "save": "Salvar e reindexar",
+          "saveFailed": "Não foi possível salvar o arquivo: {message}",
+          "saved": "Salvo. Reindexação iniciada.",
+          "saving": "Salvando…",
+          "title": "Editar {fileName}"
+        },
         "empty": {
           "description": "Nenhum arquivo neste conector"
+        },
+        "groups": {
+          "collapse": "Ocultar arquivos",
+          "expand": "Mostrar arquivos",
+          "fileCount": "{count, plural, one {# arquivo} other {# arquivos}}"
         },
         "header": {
           "title": "Arquivos ({count, plural, one {# arquivo} other {# arquivos}})"
@@ -8360,6 +8380,49 @@
           "label": "URL base da API",
           "description": "A URL base da sua API do Firecrawl."
         }
+      }
+    },
+    "legalSplit": {
+      "createdToast": "{files, plural, one {# arquivo criado} other {# arquivos criados}} a partir de {sources, plural, one {# arquivo jurídico} other {# arquivos jurídicos}}",
+      "keptWholeToast": "{source} foi salvo como um único arquivo: nenhum artigo ou decisão encontrado",
+      "preview": {
+        "button": "Visualizar divisão",
+        "failed": "Não foi possível visualizar a divisão: {message}",
+        "loading": "Lendo arquivos…",
+        "moreUnits": "…e mais {count, plural, one {#} other {#}}",
+        "noFiles": "Selecione um arquivo primeiro.",
+        "notSplit": "{source}: nenhum artigo ou decisão encontrado. O arquivo permanece inteiro.",
+        "split": "{source}: {count, plural, one {# arquivo} other {# arquivos}} como {profile}",
+        "title": "Prévia da divisão",
+        "unsupported": "{source}: este tipo de arquivo não é dividido.",
+        "warnings": "{count, plural, one {# aviso} other {# avisos}}"
+      },
+      "profiles": {
+        "auto": {
+          "description": "Detectar o formato a partir do texto",
+          "label": "Detectar automaticamente"
+        },
+        "cassation": {
+          "description": "Um arquivo por decisão de cassação, dividido em cada linha de número do processo",
+          "label": "Decisões de cassação"
+        },
+        "civilCode": {
+          "description": "Um arquivo por linha de artigo que começa com ቍ",
+          "label": "Artigos do Código Civil"
+        },
+        "none": {
+          "description": "Indexar cada arquivo como um documento",
+          "label": "Não dividir"
+        },
+        "proclamation": {
+          "description": "Um arquivo por artigo አንቀጽ, com o contexto de capítulo e seção",
+          "label": "Artigos de proclamação"
+        }
+      },
+      "selector": {
+        "description": "Salva cada artigo ou decisão judicial de um arquivo .md, .txt ou .docx como um arquivo próprio, para que os resultados de busca nunca misturem dois artigos.",
+        "label": "Dividir arquivos jurídicos",
+        "placeholder": "Escolha um perfil de divisão"
       }
     }
   },

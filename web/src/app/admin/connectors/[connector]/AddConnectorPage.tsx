@@ -12,6 +12,10 @@ import { SourceIcon } from "@/components/SourceIcon";
 import { useEffect, useRef, useState } from "react";
 import { deleteCredential, linkCredential } from "@/lib/credential";
 import { submitFiles } from "@/app/admin/connectors/[connector]/pages/utils/files";
+import LegalSplitOptions, {
+  splitProfileFromValues,
+} from "@/app/admin/connectors/[connector]/pages/LegalSplitOptions";
+import { useSplitSummaryToast } from "@/lib/legalSplit/hooks";
 import { submitGoogleSite } from "@/app/admin/connectors/[connector]/pages/utils/google_site";
 import AdvancedFormPage from "@/app/admin/connectors/[connector]/pages/Advanced";
 import DynamicConnectionForm from "@/app/admin/connectors/[connector]/pages/DynamicConnectorCreationForm";
@@ -144,6 +148,7 @@ export default function AddConnector({
   connector: ConfigurableSources;
 }) {
   const t = useTranslations("admin.connectorsList");
+  const showSplitSummary = useSplitSummaryToast();
   const [currentPageUrl, setCurrentPageUrl] = useState<string | null>(null);
   const [oauthUrl, setOauthUrl] = useState<string | null>(null);
   const [isAuthorizing, setIsAuthorizing] = useState(false);
@@ -425,9 +430,11 @@ export default function AddConnector({
               selectedFiles,
               name,
               access_type,
-              groups
+              groups,
+              splitProfileFromValues({ split_profile: values.split_profile })
             );
             if (response) {
+              showSplitSummary(response.split_summary);
               onSuccess();
             }
           } catch (error) {
@@ -709,6 +716,7 @@ export default function AddConnector({
                   null
                 }
               />
+              {connector === "file" && <LegalSplitOptions />}
               <ConnectorDocsLink sourceType={connector} />
             </CardSection>
           )}

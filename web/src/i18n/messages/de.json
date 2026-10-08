@@ -1913,8 +1913,28 @@
         "editButton": {
           "label": "Bearbeiten"
         },
+        "editContentButton": {
+          "tooltip": "Text bearbeiten"
+        },
+        "editModal": {
+          "cancel": "Abbrechen",
+          "description": "Beim Speichern wird der Text ersetzt und dieses Dokument neu indexiert. ID und Zitate bleiben gleich.",
+          "emptyError": "Der Text darf nicht leer sein.",
+          "loadError": "Datei konnte nicht geladen werden: {message}",
+          "placeholder": "Dateitext",
+          "save": "Speichern und neu indexieren",
+          "saveFailed": "Datei konnte nicht gespeichert werden: {message}",
+          "saved": "Gespeichert. Neuindexierung gestartet.",
+          "saving": "Wird gespeichert…",
+          "title": "{fileName} bearbeiten"
+        },
         "empty": {
           "description": "Keine Dateien in diesem Konnektor"
+        },
+        "groups": {
+          "collapse": "Dateien ausblenden",
+          "expand": "Dateien anzeigen",
+          "fileCount": "{count, plural, one {# Datei} other {# Dateien}}"
         },
         "header": {
           "title": "Dateien ({count, plural, one {# Datei} other {# Dateien}})"
@@ -8360,6 +8380,49 @@
           "label": "API-Basis-URL",
           "description": "Die Basis-URL Ihrer Firecrawl-API."
         }
+      }
+    },
+    "legalSplit": {
+      "createdToast": "{files, plural, one {# Datei} other {# Dateien}} aus {sources, plural, one {# Rechtsdatei} other {# Rechtsdateien}} erstellt",
+      "keptWholeToast": "{source} wurde als eine Datei gespeichert: keine Artikel oder Entscheidungen gefunden",
+      "preview": {
+        "button": "Aufteilung anzeigen",
+        "failed": "Vorschau der Aufteilung fehlgeschlagen: {message}",
+        "loading": "Dateien werden gelesen…",
+        "moreUnits": "…und {count, plural, one {# weitere} other {# weitere}}",
+        "noFiles": "Wählen Sie zuerst eine Datei aus.",
+        "notSplit": "{source}: keine Artikel oder Entscheidungen gefunden. Die Datei bleibt ganz.",
+        "split": "{source}: {count, plural, one {# Datei} other {# Dateien}} als {profile}",
+        "title": "Vorschau der Aufteilung",
+        "unsupported": "{source}: Dieser Dateityp wird nicht aufgeteilt.",
+        "warnings": "{count, plural, one {# Warnung} other {# Warnungen}}"
+      },
+      "profiles": {
+        "auto": {
+          "description": "Das Layout aus dem Text erkennen",
+          "label": "Automatisch erkennen"
+        },
+        "cassation": {
+          "description": "Eine Datei pro Kassationsentscheidung, getrennt an jeder Aktenzeichenzeile",
+          "label": "Kassationsentscheidungen"
+        },
+        "civilCode": {
+          "description": "Eine Datei pro Artikelzeile, die mit ቍ beginnt",
+          "label": "Artikel des Zivilgesetzbuchs"
+        },
+        "none": {
+          "description": "Jede Datei als ein Dokument indexieren",
+          "label": "Nicht aufteilen"
+        },
+        "proclamation": {
+          "description": "Eine Datei pro አንቀጽ-Artikel, mit Kapitel- und Abschnittskontext",
+          "label": "Artikel einer Proklamation"
+        }
+      },
+      "selector": {
+        "description": "Speichert jeden Artikel oder jede Gerichtsentscheidung einer .md-, .txt- oder .docx-Datei als eigene Datei, damit Suchergebnisse nie zwei Artikel vermischen.",
+        "label": "Rechtsdateien aufteilen",
+        "placeholder": "Aufteilungsprofil wählen"
       }
     }
   },

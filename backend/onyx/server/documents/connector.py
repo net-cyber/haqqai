@@ -3,7 +3,7 @@ import math
 import mimetypes
 import os
 import zipfile
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from typing import Any, cast
 
@@ -112,6 +112,12 @@ from onyx.db.models import (
 )
 from onyx.error_handling.error_codes import OnyxErrorCode
 from onyx.error_handling.exceptions import OnyxError
+from onyx.file_processing.legal.ethiopian_legal_splitter import SplitProfile
+from onyx.file_processing.legal.materialize import (
+    UPDATED_AT_KEY,
+    render_with_header,
+    strip_header,
+)
 from onyx.file_store.file_store import (
     FILE_SIZE_MISSING_SENTINEL,
     FileStore,
@@ -119,11 +125,23 @@ from onyx.file_store.file_store import (
 )
 from onyx.redis.redis_pool import get_redis_client
 from onyx.redis.redis_tenant_work_gating import maybe_mark_tenant_active
+from onyx.server.documents.file_splitting import (
+    build_split_preview,
+    build_split_summary,
+    is_editable,
+    is_splittable,
+    parse_split_profile,
+    plan_split,
+    store_split_units,
+    unsplittable_preview,
+)
 from onyx.server.documents.models import (
     AuthStatus,
     AuthUrl,
     ConnectorBase,
     ConnectorCredentialPairIdentifier,
+    ConnectorFileContentResponse,
+    ConnectorFileContentUpdateRequest,
     ConnectorFileInfo,
     ConnectorFilesResponse,
     ConnectorIndexingStatusLite,
@@ -145,6 +163,9 @@ from onyx.server.documents.models import (
     ObjectCreationIdResponse,
     RunConnectorRequest,
     SourceSummary,
+    SplitPreviewResponse,
+    SplitPreviewSource,
+    SplitSummary,
 )
 from onyx.server.federated.models import FederatedConnectorStatus
 from onyx.server.models import StatusResponse
@@ -172,6 +193,11 @@ _INDEXING_STATUS_PAGE_SIZE = 10
 
 SEEN_ZIP_DETAIL = "Only one zip file is allowed per file connector, \
 use the ingestion APIs for multiple files"
+
+# Text files larger than this cannot be opened or saved in the file editor.
+_MAX_EDITABLE_FILE_BYTES = 5 * 1024 * 1024
+# Matches the beat schedule's default expiry for indexing checks.
+_INDEXING_CHECK_EXPIRES_SECONDS = 15 * 60
 
 router = APIRouter(prefix="/manage", dependencies=[Depends(require_vector_db)])
 
@@ -300,7 +326,11 @@ def upload_files(
     files: list[UploadFile],
     file_origin: FileOrigin = FileOrigin.CONNECTOR,
     unzip: bool = True,
+    split_profile: SplitProfile = SplitProfile.NONE,
 ) -> FileUploadResponse:
+    """Store uploaded files. With a split profile, each splittable text file is
+    stored as one markdown file per article or decision instead of as a whole."""
+
     # Skip directories and known macOS metadata entries
     def should_process_file(file_path: str) -> bool:
         normalized_path = os.path.normpath(file_path)
@@ -309,6 +339,21 @@ def upload_files(
     deduped_file_paths = []
     deduped_file_names = []
     zip_metadata_file_id: str | None = None
+    split_summaries: list[SplitSummary] = []
+
+    def store_split(file_store: FileStore, file_name: str, data: bytes) -> bool:
+        """Store the units of one file. False when the file must be stored whole."""
+        if split_profile == SplitProfile.NONE or not is_splittable(file_name):
+            return False
+        planned = plan_split(file_name, data, split_profile)
+        split_summaries.append(build_split_summary(planned))
+        if not planned.result.units:
+            return False
+        unit_ids, unit_names = store_split_units(file_store, planned, file_origin)
+        deduped_file_paths.extend(unit_ids)
+        deduped_file_names.extend(unit_names)
+        return True
+
     try:
         file_store = get_default_file_store()
         seen_zip = False
@@ -336,6 +381,12 @@ def upload_files(
                                 continue
 
                             sub_file_bytes = zf.read(file_info)
+                            if store_split(
+                                file_store,
+                                os.path.basename(file_info),
+                                sub_file_bytes,
+                            ):
+                                continue
 
                             mime_type, __ = mimetypes.guess_type(file_info)
                             if mime_type is None:
@@ -363,6 +414,11 @@ def upload_files(
                 deduped_file_names.append(file.filename)
                 continue
 
+            if split_profile != SplitProfile.NONE and is_splittable(file.filename):
+                if store_split(file_store, file.filename, file.file.read()):
+                    continue
+                file.file.seek(0)
+
             file_id = file_store.save_file(
                 content=file.file,
                 display_name=file.filename,
@@ -378,6 +434,7 @@ def upload_files(
         file_paths=deduped_file_paths,
         file_names=deduped_file_names,
         zip_metadata_file_id=zip_metadata_file_id,
+        split_summary=split_summaries if split_profile != SplitProfile.NONE else None,
     )
 
 
@@ -434,13 +491,52 @@ def _fetch_and_check_file_connector_cc_pair_permissions(
 def upload_files_api(
     files: list[UploadFile],
     unzip: bool = True,
+    split_profile: str = Form(SplitProfile.NONE.value),
     _: User = Depends(
         require_permission(Permission.MANAGE_CONNECTORS, allow_scope=True)
     ),
 ) -> FileUploadResponse:
     # No GATE 2: there is no resource to scope yet, since this only stores bytes and
     # returns ids. The manager is held to their groups when the credential is associated.
-    return upload_files(files, FileOrigin.CONNECTOR_FILE_UPLOAD, unzip=unzip)
+    return upload_files(
+        files,
+        FileOrigin.CONNECTOR_FILE_UPLOAD,
+        unzip=unzip,
+        split_profile=parse_split_profile(split_profile),
+    )
+
+
+@router.post("/admin/connector/file/split-preview", tags=PUBLIC_API_TAGS)
+def preview_file_split(
+    files: list[UploadFile],
+    split_profile: str = Form(SplitProfile.AUTO.value),
+    _: User = Depends(
+        require_permission(Permission.MANAGE_CONNECTORS, allow_scope=True)
+    ),
+) -> SplitPreviewResponse:
+    """Show how uploads would be split, without storing anything."""
+    profile = parse_split_profile(split_profile)
+    sources: list[SplitPreviewSource] = []
+    for file in files:
+        if not file.filename:
+            continue
+        entries: list[tuple[str, bytes]] = []
+        if is_zip_file(file):
+            with zipfile.ZipFile(file.file, "r") as zf:
+                for info in zf.infolist():
+                    name = os.path.basename(info.filename)
+                    if info.is_dir() or not name or name.startswith("."):
+                        continue
+                    entries.append((name, zf.read(info)))
+        else:
+            entries.append((file.filename, file.file.read()))
+
+        for name, data in entries:
+            if profile == SplitProfile.NONE or not is_splittable(name):
+                sources.append(unsplittable_preview(name))
+            else:
+                sources.append(build_split_preview(plan_split(name, data, profile)))
+    return SplitPreviewResponse(sources=sources)
 
 
 @router.get("/admin/connector/{connector_id}/files", tags=PUBLIC_API_TAGS)
@@ -552,16 +648,182 @@ def list_connector_files(
             # The missing-object sentinel (negative) renders as unknown.
             file_size = raw_size if raw_size is not None and raw_size >= 0 else None
             upload_date = record.created_at.isoformat() if record.created_at else None
+        split_info = _split_info(record.file_metadata if record else None)
         files.append(
             ConnectorFileInfo(
                 file_id=file_id,
                 file_name=file_name,
                 file_size=file_size,
                 upload_date=upload_date,
+                document_id=f"FILE_CONNECTOR__{file_id}",
+                editable=is_editable(file_name)
+                and (file_size is None or file_size <= _MAX_EDITABLE_FILE_BYTES),
+                parent_file_name=split_info.get("split_parent_name"),
+                unit_id=split_info.get("unit_id"),
+                unit_type=split_info.get("legal_unit_type"),
+                unit_title=split_info.get("unit_title"),
             )
         )
 
     return ConnectorFilesResponse(files=files)
+
+
+def _split_info(file_metadata: Any) -> dict[str, str]:
+    """String provenance fields written by the legal splitter, if any."""
+    if not isinstance(file_metadata, dict):
+        return {}
+    return {
+        key: str(value)
+        for key, value in file_metadata.items()
+        if key in ("split_parent_name", "unit_id", "legal_unit_type", "unit_title")
+        and value is not None
+    }
+
+
+def _get_editable_connector_file(
+    connector_id: int,
+    file_id: str,
+    user: User,
+    db_session: Session,
+) -> tuple[ConnectorCredentialPair, FileRecord]:
+    connector = fetch_connector_by_id(connector_id, db_session)
+    if connector is None:
+        raise OnyxError(OnyxErrorCode.CONNECTOR_NOT_FOUND, "Connector not found")
+    if connector.source != DocumentSource.FILE:
+        raise OnyxError(
+            OnyxErrorCode.INVALID_INPUT,
+            "This endpoint only works with file connectors",
+        )
+    cc_pair = _fetch_and_check_file_connector_cc_pair_permissions(
+        connector_id=connector_id,
+        user=user,
+        db_session=db_session,
+        require_editable=True,
+    )
+    # A file id is a global key: only files listed on this connector are reachable.
+    if file_id not in connector.connector_specific_config.get("file_locations", []):
+        raise OnyxError(OnyxErrorCode.NOT_FOUND, "File not found in this connector")
+    records = get_filerecords_by_file_ids([file_id], db_session)
+    if not records:
+        raise OnyxError(OnyxErrorCode.NOT_FOUND, "File not found")
+    record = records[0]
+    if not is_editable(record.display_name):
+        raise OnyxError(
+            OnyxErrorCode.INVALID_INPUT,
+            "Only .md, .mdx and .txt files can be edited",
+        )
+    return cc_pair, record
+
+
+def _read_text(file_store: FileStore, file_id: str) -> str:
+    data = file_store.read_file(file_id=file_id, mode="b").read()
+    if len(data) > _MAX_EDITABLE_FILE_BYTES:
+        raise OnyxError(
+            OnyxErrorCode.PAYLOAD_TOO_LARGE, "File is too large to edit in the browser"
+        )
+    return data.decode("utf-8", errors="replace")
+
+
+def _trigger_update_indexing(cc_pair_id: int, db_session: Session) -> None:
+    """Ask the indexing check to run an UPDATE pass on this cc-pair now."""
+    mark_ccpair_with_indexing_trigger(cc_pair_id, IndexingMode.UPDATE, db_session)
+    client_app.send_task(
+        OnyxCeleryTask.CHECK_FOR_INDEXING,
+        kwargs={"tenant_id": get_current_tenant_id()},
+        priority=OnyxCeleryPriority.HIGH,
+        expires=_INDEXING_CHECK_EXPIRES_SECONDS,
+    )
+
+
+@router.get(
+    "/admin/connector/{connector_id}/files/{file_id}/content", tags=PUBLIC_API_TAGS
+)
+def get_connector_file_content(
+    connector_id: int,
+    file_id: str,
+    response: Response,
+    user: User = Depends(
+        require_permission(Permission.MANAGE_CONNECTORS, allow_scope=True)
+    ),
+    db_session: Session = Depends(get_session),
+) -> ConnectorFileContentResponse:
+    """Text of one connector file, without its ONYX_METADATA header line."""
+    _, record = _get_editable_connector_file(connector_id, file_id, user, db_session)
+    metadata, body = strip_header(_read_text(get_default_file_store(), file_id))
+    response.headers["Cache-Control"] = "no-store"
+    return ConnectorFileContentResponse(
+        file_id=file_id,
+        file_name=record.display_name,
+        content=body,
+        metadata=metadata,
+    )
+
+
+@router.put(
+    "/admin/connector/{connector_id}/files/{file_id}/content", tags=PUBLIC_API_TAGS
+)
+def update_connector_file_content(
+    connector_id: int,
+    file_id: str,
+    update: ConnectorFileContentUpdateRequest,
+    user: User = Depends(
+        require_permission(Permission.MANAGE_CONNECTORS, allow_scope=True)
+    ),
+    db_session: Session = Depends(get_session),
+) -> ConnectorFileContentResponse:
+    """Replace the text of one connector file and re-index it.
+
+    The file keeps its id, so the document keeps its id and is updated in place.
+    The ONYX_METADATA header is kept, with a new `doc_updated_at`.
+    """
+    cc_pair, record = _get_editable_connector_file(
+        connector_id, file_id, user, db_session
+    )
+    if len(update.content.encode("utf-8")) > _MAX_EDITABLE_FILE_BYTES:
+        raise OnyxError(OnyxErrorCode.PAYLOAD_TOO_LARGE, "Content is too large")
+    # A header pasted into the editor is ignored; the stored header is kept.
+    _, body = strip_header(update.content)
+    if not body.strip():
+        raise OnyxError(OnyxErrorCode.INVALID_INPUT, "Content must not be empty")
+
+    file_store = get_default_file_store()
+    metadata, _ = strip_header(_read_text(file_store, file_id))
+    edited_at = datetime.now(timezone.utc).isoformat()
+    if metadata:
+        metadata[UPDATED_AT_KEY] = edited_at
+    new_text = render_with_header(metadata, body)
+
+    file_metadata: dict[str, Any] = (
+        {str(k): v for k, v in record.file_metadata.items()}
+        if isinstance(record.file_metadata, dict)
+        else {}
+    )
+    file_store.save_file(
+        content=BytesIO(new_text.encode("utf-8")),
+        display_name=record.display_name,
+        file_origin=record.file_origin,
+        file_type=record.file_type,
+        # The record upsert replaces file_metadata, so carry the old values over.
+        file_metadata={**file_metadata, "edited_at": edited_at},
+        file_id=file_id,
+    )
+
+    try:
+        _trigger_update_indexing(cc_pair.id, db_session)
+    except Exception:
+        # The file is saved; the next scheduled run picks up the change.
+        logger.exception(
+            "Failed to trigger indexing after editing file %s of connector %s",
+            file_id,
+            connector_id,
+        )
+
+    return ConnectorFileContentResponse(
+        file_id=file_id,
+        file_name=record.display_name,
+        content=body.strip("\n") + "\n",
+        metadata=metadata,
+    )
 
 
 @router.post("/admin/connector/{connector_id}/files/update", tags=PUBLIC_API_TAGS)
@@ -569,6 +831,7 @@ def update_connector_files(
     connector_id: int,
     files: list[UploadFile] | None = File(None),
     file_ids_to_remove: str = Form("[]"),
+    split_profile: str = Form(SplitProfile.NONE.value),
     user: User = Depends(
         require_permission(Permission.MANAGE_CONNECTORS, allow_scope=True)
     ),
@@ -579,6 +842,7 @@ def update_connector_files(
     This is an atomic operation that validates, updates the connector config, and triggers indexing.
     """
     files = files or []
+    profile = parse_split_profile(split_profile)
     connector = fetch_connector_by_id(connector_id, db_session)
     if connector is None:
         raise HTTPException(status_code=404, detail="Connector not found")
@@ -641,9 +905,13 @@ def update_connector_files(
     new_file_names_list = []
     new_zip_metadata_file_id: str | None = None
     new_zip_metadata: dict[str, Any] = {}
+    split_summary: list[SplitSummary] | None = None
 
     if files and len(files) > 0:
-        upload_response = upload_files(files, FileOrigin.CONNECTOR)
+        upload_response = upload_files(
+            files, FileOrigin.CONNECTOR, split_profile=profile
+        )
+        split_summary = upload_response.split_summary
         new_file_paths = upload_response.file_paths
         new_file_names_list = upload_response.file_names
         new_zip_metadata_file_id = upload_response.zip_metadata_file_id
@@ -787,6 +1055,7 @@ def update_connector_files(
         file_paths=final_file_locations,
         file_names=final_file_names,
         zip_metadata_file_id=final_zip_metadata_file_id,
+        split_summary=split_summary,
     )
 
 

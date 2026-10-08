@@ -1913,8 +1913,28 @@
         "editButton": {
           "label": "Edit"
         },
+        "editContentButton": {
+          "tooltip": "Change text"
+        },
+        "editModal": {
+          "cancel": "Cancel",
+          "description": "Saving replaces the text and re-indexes this document. Its ID and citations stay the same.",
+          "emptyError": "The text must not be empty.",
+          "loadError": "Could not load the file: {message}",
+          "placeholder": "File text",
+          "save": "Save and re-index",
+          "saveFailed": "Could not save the file: {message}",
+          "saved": "Saved. Re-indexing started.",
+          "saving": "Saving…",
+          "title": "Edit {fileName}"
+        },
         "empty": {
           "description": "No files in this connector"
+        },
+        "groups": {
+          "collapse": "Hide files",
+          "expand": "Show files",
+          "fileCount": "{count, plural, one {# file} other {# files}}"
         },
         "header": {
           "title": "Files ({count, plural, one {# file} other {# files}})"
@@ -8360,6 +8380,49 @@
           "label": "API Base URL",
           "description": "Your Firecrawl API base URL."
         }
+      }
+    },
+    "legalSplit": {
+      "createdToast": "Created {files, plural, one {# file} other {# files}} from {sources, plural, one {# legal file} other {# legal files}}",
+      "keptWholeToast": "{source} was stored as one file: no articles or decisions were found",
+      "preview": {
+        "button": "Preview split",
+        "failed": "Could not preview the split: {message}",
+        "loading": "Reading files…",
+        "moreUnits": "…and {count, plural, one {# more} other {# more}}",
+        "noFiles": "Select a file first.",
+        "notSplit": "{source}: no articles or decisions found. The file stays whole.",
+        "split": "{source}: {count, plural, one {# file} other {# files}} as {profile}",
+        "title": "Split preview",
+        "unsupported": "{source}: this file type is not split.",
+        "warnings": "{count, plural, one {# warning} other {# warnings}}"
+      },
+      "profiles": {
+        "auto": {
+          "description": "Detect the layout from the text",
+          "label": "Detect automatically"
+        },
+        "cassation": {
+          "description": "One file per cassation decision, split at each case-number line",
+          "label": "Cassation decisions"
+        },
+        "civilCode": {
+          "description": "One file per article line that starts with ቍ",
+          "label": "Civil Code articles"
+        },
+        "none": {
+          "description": "Index each file as one document",
+          "label": "Do not split"
+        },
+        "proclamation": {
+          "description": "One file per አንቀጽ article, with chapter and section context",
+          "label": "Proclamation articles"
+        }
+      },
+      "selector": {
+        "description": "Store each article or court decision of a .md, .txt or .docx file as its own file, so search results never mix two articles.",
+        "label": "Split legal files",
+        "placeholder": "Choose a split profile"
       }
     }
   },

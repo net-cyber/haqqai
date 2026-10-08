@@ -1913,8 +1913,28 @@
         "editButton": {
           "label": "编辑"
         },
+        "editContentButton": {
+          "tooltip": "编辑文本"
+        },
+        "editModal": {
+          "cancel": "取消",
+          "description": "保存后将替换文本并重新索引此文档。其 ID 和引用保持不变。",
+          "emptyError": "文本不能为空。",
+          "loadError": "无法加载文件：{message}",
+          "placeholder": "文件文本",
+          "save": "保存并重新索引",
+          "saveFailed": "无法保存文件：{message}",
+          "saved": "已保存。已开始重新索引。",
+          "saving": "正在保存…",
+          "title": "编辑 {fileName}"
+        },
         "empty": {
           "description": "此连接器中没有文件"
+        },
+        "groups": {
+          "collapse": "隐藏文件",
+          "expand": "显示文件",
+          "fileCount": "{count, plural, other {# 个文件}}"
         },
         "header": {
           "title": "文件（{count, plural, one {# 个文件} other {# 个文件}}）"
@@ -8360,6 +8380,49 @@
           "label": "API 基础 URL",
           "description": "您的 Firecrawl API 基础 URL。"
         }
+      }
+    },
+    "legalSplit": {
+      "createdToast": "已从{sources, plural, other {# 个法律文件}}创建{files, plural, other {# 个文件}}",
+      "keptWholeToast": "{source} 已保存为一个文件：未找到条款或判决",
+      "preview": {
+        "button": "预览拆分",
+        "failed": "无法预览拆分：{message}",
+        "loading": "正在读取文件…",
+        "moreUnits": "…另有 {count, plural, other {# 个}}",
+        "noFiles": "请先选择文件。",
+        "notSplit": "{source}：未找到条款或判决。文件保持完整。",
+        "split": "{source}：按{profile}拆分为 {count, plural, other {# 个文件}}",
+        "title": "拆分预览",
+        "unsupported": "{source}：此文件类型不拆分。",
+        "warnings": "{count, plural, other {# 条警告}}"
+      },
+      "profiles": {
+        "auto": {
+          "description": "根据文本识别结构",
+          "label": "自动检测"
+        },
+        "cassation": {
+          "description": "在每个案号行处拆分，每个判决一个文件",
+          "label": "撤销审判决"
+        },
+        "civilCode": {
+          "description": "每个以 ቍ 开头的条款行一个文件",
+          "label": "民法典条款"
+        },
+        "none": {
+          "description": "每个文件作为一个文档建立索引",
+          "label": "不拆分"
+        },
+        "proclamation": {
+          "description": "每个 አንቀጽ 条款一个文件，并保留章和节的信息",
+          "label": "公告条款"
+        }
+      },
+      "selector": {
+        "description": "将 .md、.txt 或 .docx 文件中的每个条款或法院判决保存为单独的文件，使搜索结果不会混合两个条款。",
+        "label": "拆分法律文件",
+        "placeholder": "选择拆分方式"
       }
     }
   },
