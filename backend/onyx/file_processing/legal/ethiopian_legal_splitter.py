@@ -21,6 +21,7 @@ import bisect
 import re
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Literal
 
 MIN_UNITS_FOR_SPLIT = 2
 MIN_ARTICLES_FOR_AUTO = 10
@@ -78,6 +79,36 @@ class LegalUnit:
     text: str
     metadata: dict[str, str] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
+    # Review fields. They are not metadata, because metadata becomes document tags.
+    # "አንቀጽ ፯", "ሰበር መ/ቁ 94952", or "" for front matter.
+    label: str = ""
+    # Article heading without the law name, e.g. "ዕድሜ".
+    heading: str = ""
+    number: int | None = None
+    # The article number as stored, in the numeral system of the source.
+    number_text: str = ""
+    # The header's first line in `text`, and how many lines it spans.
+    header_start: int = 0
+    header_lines: int = 0
+    # (level, crumb) pairs, e.g. ("chapter", "ምዕራፍ አንድ ስለ ጋብቻ አፈጻጸም").
+    crumbs: list[tuple[str, str]] = field(default_factory=list)
+    # The number as written in the source, when the splitter repaired it.
+    repaired_from: str | None = None
+    out_of_sequence: bool = False
+
+
+KeptWholeReason = Literal["auto_too_few", "too_few_units"]
+
+
+@dataclass
+class KeptWhole:
+    """Why a splittable file stays one document."""
+
+    reason: KeptWholeReason
+    found: int
+    minimum: int
+    # A profile that would split the file, when one exists.
+    suggested_profile: SplitProfile | None = None
 
 
 @dataclass
@@ -87,6 +118,7 @@ class SplitResult:
     # Empty when the text should stay whole.
     units: list[LegalUnit]
     warnings: list[str] = field(default_factory=list)
+    kept_whole: KeptWhole | None = None
 
 
 # --- Numbers ---------------------------------------------------------------
@@ -236,7 +268,7 @@ _PROCLAMATION_ARTICLE_RE = re.compile(
 _BARE_ARTICLE_WORD_RE = re.compile(r"^አንቀ[ጽፅ]\s*[.:፡]?$")
 _LEADING_NUMBER_RE = re.compile(rf"^(?P<num>{_ARTICLE_NUMBER})(?P<rest>.*)$")
 # "አንቀጽ ፳ ንዑስ አንቀጽ (፫) ..." is a cross-reference, not a header.
-_CROSS_REFERENCE_RE = re.compile(r"^\s*(?:ን[ዑኡ]ስ|እና|ና|፣|,|እስከ)")
+_CROSS_REFERENCE_RE = re.compile(r"^\s*(?:ን[ዑኡ]ስ|(?:እና|ና|እስከ)(?=[\s፩-፼\d]|$)|፣|,)")
 
 # Civil Code article: "ቍ ፰፻፳፮ ...".
 _CIVIL_ARTICLE_RE = re.compile(
@@ -265,6 +297,8 @@ class _ArticleHeader:
     repaired: bool = False
     out_of_sequence: bool = False
     header_lines: int = 1  # 2 when "አንቀጽ" and the number sit on separate lines
+    # Raw index of the header's last line; differs from line.index for 2-line headers.
+    last_line_index: int | None = None
 
 
 def _parse_number_or_none(token: str) -> int | None:
@@ -336,11 +370,17 @@ def _assign_article_numbers(headers: list[_ArticleHeader]) -> None:
         i = j
 
 
+# The ")" of a parenthesized number, which the number pattern leaves behind.
+_LEFTOVER_PAREN_RE = re.compile(r"^\)\s*")
+# Like _strip_edge_punctuation, but keeps parentheses: "(፪) ..." is a sub-article mark.
+_HEADING_EDGE_CHARS = " .,:;፡።፦-–—…/\\_|{}"
+
+
 def _heading_from_rest(rest: str, header: _ArticleHeader) -> str:
-    rest = rest.strip()
+    rest = _LEFTOVER_PAREN_RE.sub("", rest.strip())
     if header.repaired:
         rest = _OCR_NUMBER_TAIL_RE.sub("", rest).strip()
-    return _strip_edge_punctuation(rest)
+    return rest.strip(_HEADING_EDGE_CHARS)
 
 
 def _find_proclamation_headers(lines: list[_Line]) -> list[_ArticleHeader]:
@@ -372,6 +412,9 @@ def _find_proclamation_headers(lines: list[_Line]) -> list[_ArticleHeader]:
                 strong=True,
                 number=_parse_number_or_none(match.group("num")),
                 header_lines=header_lines,
+                last_line_index=lines[position + 1].index
+                if header_lines == 2
+                else None,
             )
         )
         skip_next = header_lines == 2
@@ -650,9 +693,18 @@ def _split_articles(
         if current is None:
             return
         body = _slice_text(raw_lines, current_start, end)
+        last_line = current.last_line_index or current.line.index
         units.append(
             _build_article_unit(
-                current, body, current_crumbs, law, article_word, unit_type, used_ids
+                current,
+                body,
+                current_crumbs,
+                law,
+                article_word,
+                unit_type,
+                used_ids,
+                header_start=current.line.index - current_start,
+                header_span=last_line - current.line.index + 1,
             )
         )
         current = None
@@ -706,6 +758,8 @@ def _build_article_unit(
     article_word: str,
     unit_type: LegalUnitType,
     used_ids: dict[str, int],
+    header_start: int = 0,
+    header_span: int = 1,
 ) -> LegalUnit:
     number = header.number
     number_text = (
@@ -743,6 +797,15 @@ def _build_article_unit(
         text=body,
         metadata=metadata,
         warnings=warnings,
+        label=label,
+        heading=heading,
+        number=number,
+        number_text=number_text,
+        header_start=header_start,
+        header_lines=header_span,
+        crumbs=[(_HIERARCHY_METADATA_KEYS[marker], crumb) for marker, crumb in crumbs],
+        repaired_from=header.raw_number.strip() if header.repaired else None,
+        out_of_sequence=header.out_of_sequence,
     )
 
 
@@ -948,23 +1011,65 @@ def _build_case_unit(
         display_name=display_name,
         text=body,
         metadata=metadata,
+        label=f"ሰበር መ/ቁ {number}",
+        header_lines=1,
     )
 
 
 # --- Entry points ------------------------------------------------------------
 
 
-def detect_profile(text: str) -> SplitProfile:
-    cases = count_cassation_decisions(text)
-    proclamation = count_proclamation_articles(text)
-    civil = count_civil_code_articles(text)
-    if cases >= MIN_CASES_FOR_CASSATION and cases * 5 >= max(proclamation, civil):
+@dataclass
+class ProfileCounts:
+    cases: int
+    proclamation: int
+    civil: int
+
+
+def profile_counts(text: str) -> ProfileCounts:
+    return ProfileCounts(
+        cases=count_cassation_decisions(text),
+        proclamation=count_proclamation_articles(text),
+        civil=count_civil_code_articles(text),
+    )
+
+
+def _detect_from_counts(counts: ProfileCounts) -> SplitProfile:
+    if counts.cases >= MIN_CASES_FOR_CASSATION and counts.cases * 5 >= max(
+        counts.proclamation, counts.civil
+    ):
         return SplitProfile.CASSATION
-    if proclamation >= MIN_ARTICLES_FOR_AUTO and proclamation >= civil:
+    if (
+        counts.proclamation >= MIN_ARTICLES_FOR_AUTO
+        and counts.proclamation >= counts.civil
+    ):
         return SplitProfile.PROCLAMATION
-    if civil >= MIN_ARTICLES_FOR_AUTO:
+    if counts.civil >= MIN_ARTICLES_FOR_AUTO:
         return SplitProfile.CIVIL_CODE
     return SplitProfile.NONE
+
+
+def detect_profile(text: str) -> SplitProfile:
+    return _detect_from_counts(profile_counts(text))
+
+
+def _auto_too_few(counts: ProfileCounts) -> KeptWhole:
+    """Explain why auto did not split, and name a profile that would."""
+    candidates = [
+        (counts.proclamation, SplitProfile.PROCLAMATION, MIN_UNITS_FOR_SPLIT),
+        (counts.civil, SplitProfile.CIVIL_CODE, MIN_UNITS_FOR_SPLIT),
+        (counts.cases, SplitProfile.CASSATION, MIN_CASES_FOR_CASSATION),
+    ]
+    usable = [
+        (count, profile) for count, profile, minimum in candidates if count >= minimum
+    ]
+    suggested = max(usable, key=lambda item: item[0])[1] if usable else None
+    return KeptWhole(
+        reason="auto_too_few",
+        found=max(counts.proclamation, counts.civil, counts.cases),
+        minimum=MIN_ARTICLES_FOR_AUTO,
+        suggested_profile=suggested,
+    )
 
 
 def split_legal_text(
@@ -976,7 +1081,12 @@ def split_legal_text(
 ) -> SplitResult:
     """Split a legal text into units. `units` is empty when the text should stay whole."""
     if profile == SplitProfile.AUTO:
-        profile = detect_profile(text)
+        counts = profile_counts(text)
+        profile = _detect_from_counts(counts)
+        if profile == SplitProfile.NONE:
+            return SplitResult(
+                profile=profile, units=[], kept_whole=_auto_too_few(counts)
+            )
     if profile == SplitProfile.NONE:
         return SplitResult(profile=profile, units=[])
 
@@ -995,6 +1105,11 @@ def split_legal_text(
             warnings=[
                 f"found {len(real_units)} unit(s) with profile {profile.value}; the file stays whole"
             ],
+            kept_whole=KeptWhole(
+                reason="too_few_units",
+                found=len(real_units),
+                minimum=MIN_UNITS_FOR_SPLIT,
+            ),
         )
     warnings = [w for u in units for w in u.warnings]
     return SplitResult(profile=profile, units=units, warnings=warnings)

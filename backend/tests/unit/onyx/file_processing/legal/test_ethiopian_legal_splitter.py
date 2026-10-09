@@ -260,3 +260,31 @@ def test_full_samples() -> None:
     )
     assert cassation.profile == SplitProfile.CASSATION
     assert len(cassation.units) == 89
+
+
+def test_heading_after_parenthesized_number_has_no_stray_paren() -> None:
+    text = "\n".join(
+        ["የሙከራ አዋጅ"]
+        + [f"አንቀጽ ({n}) ርዕስ {i}\nጽሑፍ {i}።" for i, n in enumerate(["፩", "፪", "፫"])]
+    )
+    result = split_legal_text(text, SplitProfile.PROCLAMATION)
+    assert [u.heading for u in result.units if u.number] == ["ርዕስ 0", "ርዕስ 1", "ርዕስ 2"]
+
+
+def test_heading_starting_with_a_conjunction_syllable_is_kept() -> None:
+    # "እናት" (mother) starts with "እና" (and) but is a heading, not a cross-reference.
+    text = "\n".join(
+        [
+            "የሙከራ አዋጅ",
+            "አንቀጽ ፩ ጠቅላላ",
+            "ጽሑፍ።",
+            "አንቀጽ ፪ እናት የተቀባዩን አባትነት ስላለማመንዋ",
+            "ጽሑፍ።",
+            "አንቀጽ ፫ ልዩ ሁኔታ",
+            "ጽሑፍ።",
+        ]
+    )
+    units = {
+        u.unit_id: u for u in split_legal_text(text, SplitProfile.PROCLAMATION).units
+    }
+    assert units["art-2"].heading == "እናት የተቀባዩን አባትነት ስላለማመንዋ"

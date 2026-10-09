@@ -8385,18 +8385,6 @@
     "legalSplit": {
       "createdToast": "{sources, plural, other {법률 파일 #개}}에서 {files, plural, other {파일 #개}}를 만들었습니다",
       "keptWholeToast": "{source}은(는) 파일 하나로 저장되었습니다. 조문이나 판결을 찾지 못했습니다",
-      "preview": {
-        "button": "분할 미리보기",
-        "failed": "분할을 미리 볼 수 없습니다: {message}",
-        "loading": "파일을 읽는 중…",
-        "moreUnits": "…외 {count, plural, other {#개}}",
-        "noFiles": "먼저 파일을 선택하세요.",
-        "notSplit": "{source}: 조문이나 판결을 찾지 못했습니다. 파일은 그대로 유지됩니다.",
-        "split": "{source}: {profile}(으)로 {count, plural, other {파일 #개}}",
-        "title": "분할 미리보기",
-        "unsupported": "{source}: 이 파일 형식은 분할되지 않습니다.",
-        "warnings": "{count, plural, other {경고 #개}}"
-      },
       "profiles": {
         "auto": {
           "description": "텍스트에서 구조를 감지합니다",
@@ -8417,6 +8405,174 @@
         "proclamation": {
           "description": "አንቀጽ 조문마다 파일 하나, 장과 절 정보 포함",
           "label": "포고 조문"
+        }
+      },
+      "review": {
+        "description": "HaqqAI가 저장할 형태 그대로 각 파일을 확인하세요. 커넥터를 만들기 전에는 아무것도 저장되지 않습니다.",
+        "empty": {
+          "title": "검토할 파일이 없습니다",
+          "description": "양식으로 돌아가 파일을 다시 선택하세요."
+        },
+        "entry": {
+          "checked": "{count, plural, other {확인함 #개}}",
+          "files": "{count, plural, other {파일 #개}}",
+          "keptWhole": "파일 하나로 유지됨",
+          "noFiles": "먼저 파일을 선택하세요.",
+          "noIssues": "문제 없음",
+          "notSplit": "분할 안 됨",
+          "open": "분할 검토",
+          "reopen": "검토 열기",
+          "toCheck": "{count, plural, other {확인 필요 #개}}"
+        },
+        "failed": {
+          "retry": "다시 시도",
+          "title": "파일을 읽을 수 없습니다"
+        },
+        "field": {
+          "applicant": "신청인",
+          "book": "편",
+          "caseNumber": "사건 번호",
+          "chapter": "장",
+          "court": "법원",
+          "date": "날짜",
+          "missingValue": "—",
+          "nameApplicant": "신청인",
+          "nameDate": "날짜",
+          "nameRespondent": "피신청인",
+          "notFound": "판결의 처음 {lines, number}줄에서 찾지 못함",
+          "part": "부",
+          "respondent": "피신청인",
+          "section": "절",
+          "size": "크기",
+          "storedAs": "저장 파일 이름",
+          "subsection": "관",
+          "volume": "권"
+        },
+        "filter": {
+          "all": "전체 {count, number}",
+          "duplicate": "번호 중복 {count, number}",
+          "missingFields": "세부 정보 없음 {count, number}",
+          "nextMissing": "다음 조문 없음 {count, number}",
+          "numberRepaired": "번호 수정됨 {count, number}",
+          "outOfSequence": "순서 어긋남 {count, number}",
+          "tierCheck": "잘못 분할되었을 수 있음",
+          "tierFixed": "분할 도구가 수정함",
+          "toCheck": "확인 필요 {count, number}"
+        },
+        "footer": {
+          "back": "양식으로 돌아가기",
+          "create": "커넥터 만들기 ({count, plural, other {파일 #개}})",
+          "createPending": "커넥터 만들기",
+          "creates": "{sources, plural, other {업로드 #건}}에서 {files, plural, other {파일 #개}} 생성",
+          "nothingToCheck": "확인할 항목 없음 · {creates}",
+          "progress": "{total, plural, other {파일 #개}} 중 {checked, number}개 확인함 · {creates}"
+        },
+        "issue": {
+          "duplicate": {
+            "body": "{label}은(는) {otherFile} 파일로도 저장됩니다. 검색 결과에 둘 다 나올 수 있습니다.",
+            "different": "두 사본의 텍스트가 다릅니다. 어느 사본이 맞는지 확인하세요.",
+            "nearly": "두 사본의 텍스트가 {count, plural, other {#자}} 다릅니다.",
+            "openOther": "다른 사본 열기",
+            "same": "두 사본의 텍스트가 같습니다. 원본 파일에 같은 페이지가 반복되었을 수 있습니다.",
+            "title": "조문 번호 중복",
+            "titleCase": "사건 번호 중복"
+          },
+          "missingFields": {
+            "body": "처음 {lines, number}줄에서 {fields}을(를) 읽지 못했습니다. 판결은 가져오지만 이 정보는 비어 있습니다.",
+            "title": "판결 세부 정보를 찾지 못함"
+          },
+          "nextMissing": {
+            "bodyOne": "파일에서 이 조문 뒤에 조문 {numberText}({number})이(가) 없습니다.",
+            "bodyRange": "파일에서 이 조문 뒤에 조문 {fromText}–{toText}({from}–{to})이(가) 없습니다.",
+            "noSuspect": "스캔에서 페이지가 빠졌거나 제목을 읽을 수 없을 수 있습니다.",
+            "showLine": "텍스트에서 보기",
+            "suspect": "그 조문의 텍스트가 이 파일 안에 있을 수 있습니다. {line, number}번째 줄이 그 제목으로 보입니다: “{text}”",
+            "title": "다음 조문을 찾지 못함"
+          },
+          "numberRepaired": {
+            "body": "파일의 제목에는 {source}(으)로 적혀 있습니다. 앞뒤 조문이 {previous}와(과) {next}이므로 이 파일은 조문 {used}(으)로 저장됩니다.",
+            "bodyEdge": "파일의 제목에는 {source}(으)로 적혀 있습니다. 이 파일은 조문 {used}(으)로 저장됩니다.",
+            "title": "순서에 따라 조문 번호를 수정함"
+          },
+          "outOfSequence": {
+            "body": "이 조문의 번호는 {number}이지만 앞뒤 조문은 {previous}와(과) {next}입니다. 적힌 번호 그대로 저장됩니다.",
+            "bodyEdge": "이 조문 번호가 앞뒤 조문의 순서와 맞지 않습니다. 적힌 번호 그대로 저장됩니다.",
+            "title": "조문 번호 순서가 맞지 않음"
+          }
+        },
+        "keptWhole": {
+          "autoTooFew": "자동 감지로 {found, plural, other {조문 #개}}를 찾았습니다. 자동 감지는 {minimum, number}개 이상을 찾을 때만 파일을 분할합니다. 짧은 법률은 문서 하나로 두어도 좋습니다.",
+          "notSplit": "이 파일은 문서 하나로 가져옵니다.",
+          "splitAs": "분할 방식: {profile}",
+          "title": "파일 하나로 유지됨",
+          "tooFewUnits": "{profile} 방식으로 {found, plural, other {단위 #개}}를 찾았습니다. 파일을 분할하려면 {minimum, number}개 이상 필요합니다.",
+          "uploadAlone": "분할하려면 이 파일만 따로 업로드하고 {profile}을(를) 선택하세요."
+        },
+        "list": {
+          "dateNotFound": "날짜를 찾지 못함",
+          "decisionTitle": "{caseNumber} · {applicant} 대 {respondent}",
+          "frontMatterArticles": "첫 조문 앞의 텍스트",
+          "frontMatterDecisions": "첫 판결 앞의 텍스트",
+          "gapOne": "{numberText}({number}) 파일에 없음",
+          "gapRange": "{fromText}–{toText}({from}–{to}) 파일에 없음",
+          "keys": "↑↓ 이동 · 스페이스 확인 · / 검색",
+          "markAll": "{count, plural, other {파일 #개}} 확인 표시",
+          "missingValue": "—",
+          "noResults": {
+            "description": "조문 번호(109 또는 ፩፻፱), 제목, 사건 번호 또는 당사자 이름으로 검색하세요.",
+            "filterTitle": "이 문제가 있는 파일이 없습니다",
+            "title": "“{query}”에 맞는 파일이 없습니다"
+          },
+          "search": "번호, 제목 또는 당사자 검색",
+          "showing": "{total, number}개 중 {shown, number}개 표시"
+        },
+        "loading": "{count, plural, other {파일 #개}} 읽는 중…",
+        "reader": {
+          "articleMeta": "조문 {number} · {chars, plural, other {#자}}",
+          "chars": "{chars, plural, other {#자}}",
+          "checked": "확인함",
+          "decisionMeta": "{date} · {chars, plural, other {#자}}",
+          "empty": "읽을 파일을 왼쪽에서 선택하세요.",
+          "fixHint": "이 파일을 수정하려면 커넥터를 만든 다음 커넥터 파일 목록에서 {fileName}을(를) 편집하거나 삭제하세요.",
+          "frontMatterTitle": "앞부분",
+          "headerWindow": "이 줄에서 세부 정보를 읽습니다",
+          "markChecked": "확인 표시",
+          "next": "다음 (↓)",
+          "nextStart": "다음 파일 시작 · {label}",
+          "position": "{index, number} / {total, number}",
+          "previous": "이전 (↑)",
+          "previousEnd": "이전 파일 끝 · {label}",
+          "truncated": "처음 {shown, number}자를 표시합니다. 전체 {total, number}자를 가져옵니다.",
+          "undo": "클릭하여 취소"
+        },
+        "source": {
+          "articles": "{count, plural, other {조문 #개}}",
+          "budgetExceeded": "일부 파일은 여기에 처음 2,000자만 표시됩니다. 전체 텍스트를 가져옵니다.",
+          "chapters": "{count, plural, other {장 #개}}",
+          "decisions": "{count, plural, other {판결 #개}}",
+          "detected": "{profile} (감지됨)",
+          "frontMatter": "앞부분",
+          "noIssues": "발견된 문제 없음",
+          "splitAs": "분할 방식",
+          "volume": "{volume}권"
+        },
+        "tab": {
+          "keptWhole": "{name} · 파일 하나로 유지",
+          "label": "{name} · {toCheck, plural, =0 {문제 없음} other {확인 필요 #개}}",
+          "notSplit": "{name} · 분할 안 됨"
+        },
+        "tag": {
+          "checked": "확인함",
+          "duplicate": "번호 중복",
+          "missingFields": "세부 정보 없음",
+          "nextMissing": "다음 조문 없음",
+          "numberRepaired": "번호 수정됨",
+          "outOfSequence": "순서 어긋남"
+        },
+        "title": "분할 검토",
+        "unsupported": {
+          "body": ".md, .txt, .docx 파일만 분할할 수 있습니다. {name}은(는) 문서 하나로 가져옵니다.",
+          "title": "분할 안 됨"
         }
       },
       "selector": {

@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from datetime import UTC, datetime, timezone
 from enum import Enum
-from typing import Any, Generic, TypeVar
+from typing import Annotated, Any, Generic, Literal, TypeVar
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -815,28 +815,135 @@ class FileUploadResponse(BaseModel):
     split_summary: list[SplitSummary] | None = None
 
 
+SplitCaseField = Literal["date", "applicant", "respondent"]
+SplitPathLevel = Literal["book", "part", "chapter", "section", "subsection"]
+SplitUnitType = Literal[
+    "proclamation_article", "civil_code_article", "cassation_decision", "front_matter"
+]
+SplitProfileName = Literal["auto", "proclamation", "civil_code", "cassation", "none"]
+
+
+class NumberRepairedIssue(BaseModel):
+    """The splitter replaced an OCR-damaged article number from the sequence."""
+
+    kind: Literal["number_repaired"] = "number_repaired"
+    # The number as written in the source heading, e.g. "፰".
+    source_number: str
+    # The cleaned source heading, at most 80 characters.
+    source_line: str
+
+
+class OutOfSequenceIssue(BaseModel):
+    """The article number does not fit the order of the articles around it."""
+
+    kind: Literal["out_of_sequence"] = "out_of_sequence"
+
+
+class DuplicateNumberIssue(BaseModel):
+    """Another unit has the same article or case number."""
+
+    kind: Literal["duplicate_number"] = "duplicate_number"
+    # The other units with this number, in document order.
+    other_unit_ids: list[str]
+    # Characters that differ from other_unit_ids[0], header lines excluded. 0 = same text.
+    differing_chars: int
+
+
+class NextMissingIssue(BaseModel):
+    """The article numbers after this unit are not in the file."""
+
+    kind: Literal["next_missing"] = "next_missing"
+    from_number: int
+    # Equals from_number when one number is missing.
+    to_number: int
+    from_text: str
+    to_text: str
+    # 0-based line in this unit's text that looks like the missing heading.
+    suspect_line: int | None
+    suspect_text: str | None
+
+
+class MissingFieldsIssue(BaseModel):
+    """Details of a court decision could not be read from its header."""
+
+    kind: Literal["missing_fields"] = "missing_fields"
+    fields: list[SplitCaseField]
+    searched_lines: int
+
+
+SplitPreviewIssue = Annotated[
+    NumberRepairedIssue
+    | OutOfSequenceIssue
+    | DuplicateNumberIssue
+    | NextMissingIssue
+    | MissingFieldsIssue,
+    Field(discriminator="kind"),
+]
+
+
+class SplitPathCrumb(BaseModel):
+    level: SplitPathLevel
+    # e.g. "ምዕራፍ አንድ ስለ ጋብቻ አፈጻጸም"
+    label: str
+
+
 class SplitPreviewUnit(BaseModel):
     unit_id: str
-    display_name: str
-    unit_type: str
+    unit_type: SplitUnitType
+    # The file name the unit is stored under, e.g. "family__art-60.md".
+    file_name: str
+    # "አንቀጽ ፷", "ሰበር መ/ቁ 94952", or "" for front matter.
+    label: str
+    heading: str
+    number: int | None
+    number_text: str | None
+    # The header's first line in `text`, and how many lines it spans.
+    header_start: int
+    header_lines: int
+    path: list[SplitPathCrumb]
+    case_number: str | None
+    date: str | None
+    applicant: str | None
+    respondent: str | None
+    # Length of the full text, also when `text` is an excerpt.
     chars: int
+    text: str
+    text_truncated: bool
+    issues: list[SplitPreviewIssue]
+
+
+class SplitKeptWhole(BaseModel):
+    reason: Literal["unsupported_type", "auto_too_few", "too_few_units"]
+    found: int | None = None
+    minimum: int | None = None
+    suggested_profile: Literal["proclamation", "civil_code", "cassation"] | None = None
 
 
 class SplitPreviewSource(BaseModel):
     source_name: str
+    size_bytes: int
+    # False only for file types that cannot be split.
     splittable: bool
-    profile: str
+    requested_profile: SplitProfileName
+    # The applied profile; "none" when the file stays whole.
+    profile: SplitProfileName
+    kept_whole: SplitKeptWhole | None
+    # Articles: the law name, sent once. Decisions: court and volume when shared.
+    law: str | None
+    court: str | None
+    volume: str | None
     # All units, including the front matter.
     unit_count: int
     # Units without the front matter.
     article_count: int
-    # The first units only.
+    # Every unit, in document order.
     units: list[SplitPreviewUnit]
-    warnings: list[str]
 
 
 class SplitPreviewResponse(BaseModel):
     sources: list[SplitPreviewSource]
+    # True when some units carry only an excerpt of their text.
+    text_budget_exceeded: bool
 
 
 class ConnectorFileInfo(BaseModel):

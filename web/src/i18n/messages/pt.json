@@ -8385,18 +8385,6 @@
     "legalSplit": {
       "createdToast": "{files, plural, one {# arquivo criado} other {# arquivos criados}} a partir de {sources, plural, one {# arquivo jurídico} other {# arquivos jurídicos}}",
       "keptWholeToast": "{source} foi salvo como um único arquivo: nenhum artigo ou decisão encontrado",
-      "preview": {
-        "button": "Visualizar divisão",
-        "failed": "Não foi possível visualizar a divisão: {message}",
-        "loading": "Lendo arquivos…",
-        "moreUnits": "…e mais {count, plural, one {#} other {#}}",
-        "noFiles": "Selecione um arquivo primeiro.",
-        "notSplit": "{source}: nenhum artigo ou decisão encontrado. O arquivo permanece inteiro.",
-        "split": "{source}: {count, plural, one {# arquivo} other {# arquivos}} como {profile}",
-        "title": "Prévia da divisão",
-        "unsupported": "{source}: este tipo de arquivo não é dividido.",
-        "warnings": "{count, plural, one {# aviso} other {# avisos}}"
-      },
       "profiles": {
         "auto": {
           "description": "Detectar o formato a partir do texto",
@@ -8417,6 +8405,174 @@
         "proclamation": {
           "description": "Um arquivo por artigo አንቀጽ, com o contexto de capítulo e seção",
           "label": "Artigos de proclamação"
+        }
+      },
+      "review": {
+        "description": "Confira cada arquivo como o HaqqAI vai armazená-lo. Nada é salvo até você criar o conector.",
+        "empty": {
+          "title": "Nenhum arquivo para revisar",
+          "description": "Volte ao formulário e selecione os arquivos novamente."
+        },
+        "entry": {
+          "checked": "{count, plural, one {# conferido} other {# conferidos}}",
+          "files": "{count, plural, one {# arquivo} other {# arquivos}}",
+          "keptWhole": "Mantido como um único arquivo",
+          "noFiles": "Selecione um arquivo primeiro.",
+          "noIssues": "Nenhum problema",
+          "notSplit": "Não dividido",
+          "open": "Revisar divisão",
+          "reopen": "Abrir revisão",
+          "toCheck": "{count, plural, other {# a conferir}}"
+        },
+        "failed": {
+          "retry": "Tentar novamente",
+          "title": "Não foi possível ler os arquivos"
+        },
+        "field": {
+          "applicant": "Requerente",
+          "book": "Livro",
+          "caseNumber": "Nº do processo",
+          "chapter": "Capítulo",
+          "court": "Tribunal",
+          "date": "Data",
+          "missingValue": "—",
+          "nameApplicant": "requerente",
+          "nameDate": "data",
+          "nameRespondent": "requerido",
+          "notFound": "Não encontrado nas primeiras {lines, number} linhas da decisão",
+          "part": "Parte",
+          "respondent": "Requerido",
+          "section": "Seção",
+          "size": "Tamanho",
+          "storedAs": "Armazenado como",
+          "subsection": "Subseção",
+          "volume": "Volume"
+        },
+        "filter": {
+          "all": "Todos {count, number}",
+          "duplicate": "Usado duas vezes {count, number}",
+          "missingFields": "Dados não encontrados {count, number}",
+          "nextMissing": "Próximo não encontrado {count, number}",
+          "numberRepaired": "Número corrigido {count, number}",
+          "outOfSequence": "Fora de ordem {count, number}",
+          "tierCheck": "Possível erro de divisão",
+          "tierFixed": "Corrigido na divisão",
+          "toCheck": "A conferir {count, number}"
+        },
+        "footer": {
+          "back": "Voltar ao formulário",
+          "create": "Criar conector ({count, plural, one {# arquivo} other {# arquivos}})",
+          "createPending": "Criar conector",
+          "creates": "Cria {files, plural, one {# arquivo} other {# arquivos}} a partir de {sources, plural, one {# arquivo enviado} other {# arquivos enviados}}",
+          "nothingToCheck": "Nada a conferir · {creates}",
+          "progress": "{checked, number} de {total, plural, one {# arquivo conferido} other {# arquivos conferidos}} · {creates}"
+        },
+        "issue": {
+          "duplicate": {
+            "body": "{label} também está armazenado como {otherFile}. A pesquisa pode retornar os dois.",
+            "different": "As cópias têm textos diferentes. Confira qual cópia está correta.",
+            "nearly": "As cópias diferem em {count, plural, one {# caractere} other {# caracteres}}.",
+            "openOther": "Abrir a outra cópia",
+            "same": "As duas cópias têm o mesmo texto. O arquivo de origem pode repetir uma página.",
+            "title": "Número de artigo usado duas vezes",
+            "titleCase": "Número de processo usado duas vezes"
+          },
+          "missingFields": {
+            "body": "Não foi possível ler estes dados nas primeiras {lines, number} linhas: {fields}. A decisão é importada e esses dados ficam vazios.",
+            "title": "Dados da decisão não encontrados"
+          },
+          "nextMissing": {
+            "bodyOne": "O artigo {numberText} ({number}) não está no arquivo depois deste artigo.",
+            "bodyRange": "Os artigos {fromText}–{toText} ({from}–{to}) não estão no arquivo depois deste artigo.",
+            "noSuspect": "A digitalização pode ter pulado uma página, ou o título pode estar ilegível.",
+            "showLine": "Mostrar no texto",
+            "suspect": "O texto desse artigo pode estar neste arquivo. A linha {line, number} parece ser o título dele: “{text}”",
+            "title": "Próximo artigo não encontrado"
+          },
+          "numberRepaired": {
+            "body": "O título no arquivo diz {source}. Os artigos antes e depois são {previous} e {next}, então este arquivo é armazenado como artigo {used}.",
+            "bodyEdge": "O título no arquivo diz {source}. Este arquivo é armazenado como artigo {used}.",
+            "title": "Número do artigo corrigido pela sequência"
+          },
+          "outOfSequence": {
+            "body": "Este artigo tem o número {number}, mas os artigos antes e depois são {previous} e {next}. Ele é armazenado com o número como está escrito.",
+            "bodyEdge": "O número deste artigo não segue a ordem dos artigos ao redor. Ele é armazenado com o número como está escrito.",
+            "title": "Número do artigo fora de ordem"
+          }
+        },
+        "keptWhole": {
+          "autoTooFew": "O perfil Detectar automaticamente encontrou {found, plural, one {# artigo} other {# artigos}}. Ele só divide um arquivo quando encontra {minimum, number} ou mais. Uma lei curta funciona bem como um único documento.",
+          "notSplit": "Este arquivo é importado como um único documento.",
+          "splitAs": "Dividir como {profile}",
+          "title": "Mantido como um único arquivo",
+          "tooFewUnits": "{profile} encontrou {found, plural, one {# unidade} other {# unidades}}. Um arquivo precisa de pelo menos {minimum, number} para ser dividido.",
+          "uploadAlone": "Para dividi-lo, envie-o sozinho e escolha {profile}."
+        },
+        "list": {
+          "dateNotFound": "Data não encontrada",
+          "decisionTitle": "{caseNumber} · {applicant} x {respondent}",
+          "frontMatterArticles": "Texto antes do primeiro artigo",
+          "frontMatterDecisions": "Texto antes da primeira decisão",
+          "gapOne": "{numberText} ({number}) não está no arquivo",
+          "gapRange": "{fromText}–{toText} ({from}–{to}) não estão no arquivo",
+          "keys": "↑↓ mover · Espaço conferir · / pesquisar",
+          "markAll": "Marcar {count, plural, one {# arquivo como conferido} other {# arquivos como conferidos}}",
+          "missingValue": "—",
+          "noResults": {
+            "description": "Pesquise por número do artigo (109 ou ፩፻፱), título, número do processo ou nome da parte.",
+            "filterTitle": "Nenhum arquivo tem este problema",
+            "title": "Nenhum arquivo corresponde a “{query}”"
+          },
+          "search": "Pesquisar número, título ou parte",
+          "showing": "Mostrando {shown, number} de {total, number}"
+        },
+        "loading": "Lendo {count, plural, one {# arquivo} other {# arquivos}}…",
+        "reader": {
+          "articleMeta": "Artigo {number} · {chars, plural, one {# caractere} other {# caracteres}}",
+          "chars": "{chars, plural, one {# caractere} other {# caracteres}}",
+          "checked": "Conferido",
+          "decisionMeta": "{date} · {chars, plural, one {# caractere} other {# caracteres}}",
+          "empty": "Selecione um arquivo à esquerda para lê-lo.",
+          "fixHint": "Para corrigir este arquivo, crie o conector e depois edite ou exclua {fileName} na lista de arquivos do conector.",
+          "frontMatterTitle": "Texto inicial",
+          "headerWindow": "Os dados são lidos destas linhas",
+          "markChecked": "Marcar como conferido",
+          "next": "Próximo (↓)",
+          "nextStart": "Início do próximo arquivo · {label}",
+          "position": "{index, number} / {total, number}",
+          "previous": "Anterior (↑)",
+          "previousEnd": "Fim do arquivo anterior · {label}",
+          "truncated": "Mostrando os primeiros {shown, number} caracteres. Todos os {total, number} caracteres serão importados.",
+          "undo": "Clique para desfazer"
+        },
+        "source": {
+          "articles": "{count, plural, one {# artigo} other {# artigos}}",
+          "budgetExceeded": "Alguns arquivos mostram aqui só os primeiros 2.000 caracteres. O texto completo é importado.",
+          "chapters": "{count, plural, one {# capítulo} other {# capítulos}}",
+          "decisions": "{count, plural, one {# decisão} other {# decisões}}",
+          "detected": "{profile} (detectado)",
+          "frontMatter": "Texto inicial",
+          "noIssues": "Nenhum problema encontrado",
+          "splitAs": "Dividir como",
+          "volume": "Volume {volume}"
+        },
+        "tab": {
+          "keptWhole": "{name} · mantido inteiro",
+          "label": "{name} · {toCheck, plural, =0 {nenhum problema} other {# a conferir}}",
+          "notSplit": "{name} · não dividido"
+        },
+        "tag": {
+          "checked": "Conferido",
+          "duplicate": "Usado duas vezes",
+          "missingFields": "Dados não encontrados",
+          "nextMissing": "Próximo não encontrado",
+          "numberRepaired": "Número corrigido",
+          "outOfSequence": "Fora de ordem"
+        },
+        "title": "Revisar divisão",
+        "unsupported": {
+          "body": "Apenas arquivos .md, .txt e .docx podem ser divididos. {name} é importado como um único documento.",
+          "title": "Não dividido"
         }
       },
       "selector": {

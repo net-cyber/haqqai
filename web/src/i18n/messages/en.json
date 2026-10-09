@@ -8385,18 +8385,6 @@
     "legalSplit": {
       "createdToast": "Created {files, plural, one {# file} other {# files}} from {sources, plural, one {# legal file} other {# legal files}}",
       "keptWholeToast": "{source} was stored as one file: no articles or decisions were found",
-      "preview": {
-        "button": "Preview split",
-        "failed": "Could not preview the split: {message}",
-        "loading": "Reading files…",
-        "moreUnits": "…and {count, plural, one {# more} other {# more}}",
-        "noFiles": "Select a file first.",
-        "notSplit": "{source}: no articles or decisions found. The file stays whole.",
-        "split": "{source}: {count, plural, one {# file} other {# files}} as {profile}",
-        "title": "Split preview",
-        "unsupported": "{source}: this file type is not split.",
-        "warnings": "{count, plural, one {# warning} other {# warnings}}"
-      },
       "profiles": {
         "auto": {
           "description": "Detect the layout from the text",
@@ -8417,6 +8405,174 @@
         "proclamation": {
           "description": "One file per አንቀጽ article, with chapter and section context",
           "label": "Proclamation articles"
+        }
+      },
+      "review": {
+        "description": "Check each file as HaqqAI will store it. Nothing is saved until you create the connector.",
+        "empty": {
+          "title": "No files to review",
+          "description": "Go back to the form and select the files again."
+        },
+        "entry": {
+          "checked": "{count, plural, other {# checked}}",
+          "files": "{count, plural, one {# file} other {# files}}",
+          "keptWhole": "Kept as one file",
+          "noFiles": "Select a file first.",
+          "noIssues": "No issues",
+          "notSplit": "Not split",
+          "open": "Review split",
+          "reopen": "Open review",
+          "toCheck": "{count, plural, other {# to check}}"
+        },
+        "failed": {
+          "retry": "Try again",
+          "title": "Could not read the files"
+        },
+        "field": {
+          "applicant": "Applicant",
+          "book": "Book",
+          "caseNumber": "Case no.",
+          "chapter": "Chapter",
+          "court": "Court",
+          "date": "Date",
+          "missingValue": "—",
+          "nameApplicant": "applicant",
+          "nameDate": "date",
+          "nameRespondent": "respondent",
+          "notFound": "Not found in the first {lines, number} lines of the decision",
+          "part": "Part",
+          "respondent": "Respondent",
+          "section": "Section",
+          "size": "Size",
+          "storedAs": "Stored as",
+          "subsection": "Subsection",
+          "volume": "Volume"
+        },
+        "filter": {
+          "all": "All {count, number}",
+          "duplicate": "Used twice {count, number}",
+          "missingFields": "Details not found {count, number}",
+          "nextMissing": "Next not found {count, number}",
+          "numberRepaired": "Number fixed {count, number}",
+          "outOfSequence": "Out of order {count, number}",
+          "tierCheck": "May be split wrong",
+          "tierFixed": "Fixed by the splitter",
+          "toCheck": "To check {count, number}"
+        },
+        "footer": {
+          "back": "Back to form",
+          "create": "Create connector ({count, plural, one {# file} other {# files}})",
+          "createPending": "Create connector",
+          "creates": "Creates {files, plural, one {# file} other {# files}} from {sources, plural, one {# upload} other {# uploads}}",
+          "nothingToCheck": "Nothing to check · {creates}",
+          "progress": "{checked, number} of {total, plural, one {# file} other {# files}} checked · {creates}"
+        },
+        "issue": {
+          "duplicate": {
+            "body": "{label} is also stored as {otherFile}. Search can return both.",
+            "different": "The copies have different text. Check which copy is correct.",
+            "nearly": "The copies differ in {count, plural, one {# character} other {# characters}}.",
+            "openOther": "Open the other copy",
+            "same": "Both copies have the same text. The source file may repeat a page.",
+            "title": "Article number used twice",
+            "titleCase": "Case number used twice"
+          },
+          "missingFields": {
+            "body": "The {fields} could not be read from the first {lines, number} lines. The decision is imported, and these details stay empty.",
+            "title": "Decision details not found"
+          },
+          "nextMissing": {
+            "bodyOne": "Article {numberText} ({number}) is not in the file after this article.",
+            "bodyRange": "Articles {fromText}–{toText} ({from}–{to}) are not in the file after this article.",
+            "noSuspect": "The scan may have skipped a page, or the heading may be unreadable.",
+            "showLine": "Show in text",
+            "suspect": "Its text may be inside this file. Line {line, number} looks like its heading: “{text}”",
+            "title": "Next article not found"
+          },
+          "numberRepaired": {
+            "body": "The heading in the file reads {source}. The articles before and after are {previous} and {next}, so this file is stored as article {used}.",
+            "bodyEdge": "The heading in the file reads {source}. This file is stored as article {used}.",
+            "title": "Article number fixed from the sequence"
+          },
+          "outOfSequence": {
+            "body": "This article is numbered {number}, but the articles before and after are {previous} and {next}. It is stored with the number as written.",
+            "bodyEdge": "This article number does not fit the order of the articles around it. It is stored with the number as written.",
+            "title": "Article number out of order"
+          }
+        },
+        "keptWhole": {
+          "autoTooFew": "Detect automatically found {found, plural, one {# article} other {# articles}}. It splits a file only when it finds {minimum, number} or more. A short law works well as one document.",
+          "notSplit": "This file is imported as one document.",
+          "splitAs": "Split as {profile}",
+          "title": "Kept as one file",
+          "tooFewUnits": "{profile} found {found, plural, one {# unit} other {# units}}. A file needs at least {minimum, number} to be split.",
+          "uploadAlone": "To split it, upload it on its own and choose {profile}."
+        },
+        "list": {
+          "dateNotFound": "Date not found",
+          "decisionTitle": "{caseNumber} · {applicant} v. {respondent}",
+          "frontMatterArticles": "Text before the first article",
+          "frontMatterDecisions": "Text before the first decision",
+          "gapOne": "{numberText} ({number}) not in the file",
+          "gapRange": "{fromText}–{toText} ({from}–{to}) not in the file",
+          "keys": "↑↓ move · Space check · / search",
+          "markAll": "Mark {count, plural, one {# file} other {# files}} as checked",
+          "missingValue": "—",
+          "noResults": {
+            "description": "Search by article number (109 or ፩፻፱), heading, case number or party name.",
+            "filterTitle": "No file has this issue",
+            "title": "No file matches “{query}”"
+          },
+          "search": "Search number, heading or party",
+          "showing": "Showing {shown, number} of {total, number}"
+        },
+        "loading": "Reading {count, plural, one {# file} other {# files}}…",
+        "reader": {
+          "articleMeta": "Article {number} · {chars, plural, one {# character} other {# characters}}",
+          "chars": "{chars, plural, one {# character} other {# characters}}",
+          "checked": "Checked",
+          "decisionMeta": "{date} · {chars, plural, one {# character} other {# characters}}",
+          "empty": "Select a file on the left to read it.",
+          "fixHint": "To fix this file, create the connector, then edit or delete {fileName} in the connector's file list.",
+          "frontMatterTitle": "Front matter",
+          "headerWindow": "Details are read from these lines",
+          "markChecked": "Mark checked",
+          "next": "Next (↓)",
+          "nextStart": "Start of the next file · {label}",
+          "position": "{index, number} / {total, number}",
+          "previous": "Previous (↑)",
+          "previousEnd": "End of the previous file · {label}",
+          "truncated": "Showing the first {shown, number} characters. All {total, number} characters will be imported.",
+          "undo": "Click to undo"
+        },
+        "source": {
+          "articles": "{count, plural, one {# article} other {# articles}}",
+          "budgetExceeded": "Some files show only their first 2,000 characters here. The full text is imported.",
+          "chapters": "{count, plural, one {# chapter} other {# chapters}}",
+          "decisions": "{count, plural, one {# decision} other {# decisions}}",
+          "detected": "{profile} (detected)",
+          "frontMatter": "Front matter",
+          "noIssues": "No issues found",
+          "splitAs": "Split as",
+          "volume": "Volume {volume}"
+        },
+        "tab": {
+          "keptWhole": "{name} · kept whole",
+          "label": "{name} · {toCheck, plural, =0 {no issues} other {# to check}}",
+          "notSplit": "{name} · not split"
+        },
+        "tag": {
+          "checked": "Checked",
+          "duplicate": "Used twice",
+          "missingFields": "Details not found",
+          "nextMissing": "Next not found",
+          "numberRepaired": "Number fixed",
+          "outOfSequence": "Out of order"
+        },
+        "title": "Review split",
+        "unsupported": {
+          "body": "Only .md, .txt and .docx files can be split. {name} is imported as one document.",
+          "title": "Not split"
         }
       },
       "selector": {

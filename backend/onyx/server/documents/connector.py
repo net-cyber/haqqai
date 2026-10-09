@@ -126,14 +126,12 @@ from onyx.file_store.file_store import (
 from onyx.redis.redis_pool import get_redis_client
 from onyx.redis.redis_tenant_work_gating import maybe_mark_tenant_active
 from onyx.server.documents.file_splitting import (
-    build_split_preview,
     build_split_summary,
     is_editable,
     is_splittable,
     parse_split_profile,
     plan_split,
     store_split_units,
-    unsplittable_preview,
 )
 from onyx.server.documents.models import (
     AuthStatus,
@@ -166,6 +164,11 @@ from onyx.server.documents.models import (
     SplitPreviewResponse,
     SplitPreviewSource,
     SplitSummary,
+)
+from onyx.server.documents.split_preview import (
+    TextBudget,
+    build_split_preview,
+    whole_file_preview,
 )
 from onyx.server.federated.models import FederatedConnectorStatus
 from onyx.server.models import StatusResponse
@@ -514,9 +517,24 @@ def preview_file_split(
         require_permission(Permission.MANAGE_CONNECTORS, allow_scope=True)
     ),
 ) -> SplitPreviewResponse:
-    """Show how uploads would be split, without storing anything."""
+    """Show every unit the uploads would be split into, with the issues to check.
+
+    Nothing is stored. One text budget covers the whole response.
+    """
     profile = parse_split_profile(split_profile)
+    budget = TextBudget()
     sources: list[SplitPreviewSource] = []
+    used_names: set[str] = set()
+
+    def unique_name(name: str) -> str:
+        # The review keys sources by name, so two "family.md" need different names.
+        candidate, copy = name, 1
+        while candidate in used_names:
+            copy += 1
+            candidate = f"{name} ({copy})"
+        used_names.add(candidate)
+        return candidate
+
     for file in files:
         if not file.filename:
             continue
@@ -524,19 +542,33 @@ def preview_file_split(
         if is_zip_file(file):
             with zipfile.ZipFile(file.file, "r") as zf:
                 for info in zf.infolist():
-                    name = os.path.basename(info.filename)
-                    if info.is_dir() or not name or name.startswith("."):
+                    base = os.path.basename(info.filename)
+                    if info.is_dir() or not base or base.startswith("."):
                         continue
-                    entries.append((name, zf.read(info)))
+                    entries.append((unique_name(base), zf.read(info)))
         else:
-            entries.append((file.filename, file.file.read()))
+            entries.append((unique_name(file.filename), file.file.read()))
 
         for name, data in entries:
             if profile == SplitProfile.NONE or not is_splittable(name):
-                sources.append(unsplittable_preview(name))
+                sources.append(
+                    whole_file_preview(
+                        name,
+                        size_bytes=len(data),
+                        requested_profile=profile,
+                        splittable=is_splittable(name),
+                    )
+                )
             else:
-                sources.append(build_split_preview(plan_split(name, data, profile)))
-    return SplitPreviewResponse(sources=sources)
+                sources.append(
+                    build_split_preview(
+                        plan_split(name, data, profile),
+                        size_bytes=len(data),
+                        requested_profile=profile,
+                        budget=budget,
+                    )
+                )
+    return SplitPreviewResponse(sources=sources, text_budget_exceeded=budget.exceeded)
 
 
 @router.get("/admin/connector/{connector_id}/files", tags=PUBLIC_API_TAGS)

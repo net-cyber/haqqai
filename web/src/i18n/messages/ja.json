@@ -8385,18 +8385,6 @@
     "legalSplit": {
       "createdToast": "{sources, plural, other {#件の法令ファイル}}から{files, plural, other {#件のファイル}}を作成しました",
       "keptWholeToast": "{source} は1つのファイルとして保存されました。条文や判決が見つかりませんでした",
-      "preview": {
-        "button": "分割をプレビュー",
-        "failed": "分割をプレビューできませんでした: {message}",
-        "loading": "ファイルを読み込んでいます…",
-        "moreUnits": "…ほか{count, plural, other {#件}}",
-        "noFiles": "先にファイルを選択してください。",
-        "notSplit": "{source}: 条文や判決が見つかりません。ファイルは分割されません。",
-        "split": "{source}: {profile}として{count, plural, other {#件のファイル}}",
-        "title": "分割のプレビュー",
-        "unsupported": "{source}: このファイル形式は分割されません。",
-        "warnings": "{count, plural, other {#件の警告}}"
-      },
       "profiles": {
         "auto": {
           "description": "テキストから構成を検出します",
@@ -8417,6 +8405,174 @@
         "proclamation": {
           "description": "አንቀጽ の条文ごとに1ファイル。章と節の情報付き",
           "label": "布告の条文"
+        }
+      },
+      "review": {
+        "description": "HaqqAI が保存する形で各ファイルをチェックしてください。コネクターを作成するまで何も保存されません。",
+        "empty": {
+          "title": "確認するファイルがありません",
+          "description": "フォームに戻って、もう一度ファイルを選択してください。"
+        },
+        "entry": {
+          "checked": "{count, plural, other {#件チェック済み}}",
+          "files": "{count, plural, other {#件のファイル}}",
+          "keptWhole": "1つのファイルのまま",
+          "noFiles": "先にファイルを選択してください。",
+          "noIssues": "問題なし",
+          "notSplit": "未分割",
+          "open": "分割結果を確認",
+          "reopen": "確認画面を開く",
+          "toCheck": "{count, plural, other {要チェック #件}}"
+        },
+        "failed": {
+          "retry": "再試行",
+          "title": "ファイルを読み取れませんでした"
+        },
+        "field": {
+          "applicant": "申立人",
+          "book": "編",
+          "caseNumber": "事件番号",
+          "chapter": "章",
+          "court": "裁判所",
+          "date": "日付",
+          "missingValue": "—",
+          "nameApplicant": "申立人",
+          "nameDate": "日付",
+          "nameRespondent": "相手方",
+          "notFound": "判決の先頭{lines, number}行に見つかりません",
+          "part": "部",
+          "respondent": "相手方",
+          "section": "節",
+          "size": "サイズ",
+          "storedAs": "保存名",
+          "subsection": "款",
+          "volume": "巻"
+        },
+        "filter": {
+          "all": "すべて {count, number}",
+          "duplicate": "番号重複 {count, number}",
+          "missingFields": "詳細なし {count, number}",
+          "nextMissing": "次の条文なし {count, number}",
+          "numberRepaired": "番号修正 {count, number}",
+          "outOfSequence": "順序違い {count, number}",
+          "tierCheck": "分割ミスの可能性",
+          "tierFixed": "分割時に自動修正",
+          "toCheck": "要チェック {count, number}"
+        },
+        "footer": {
+          "back": "フォームに戻る",
+          "create": "コネクターを作成（{count, plural, other {#件のファイル}}）",
+          "createPending": "コネクターを作成",
+          "creates": "{sources, plural, other {#件のアップロード}}から{files, plural, other {#件のファイル}}を作成",
+          "nothingToCheck": "チェック対象なし · {creates}",
+          "progress": "{total, plural, other {#件のファイル}}のうち{checked, number}件チェック済み · {creates}"
+        },
+        "issue": {
+          "duplicate": {
+            "body": "{label} は {otherFile} としても保存されています。検索で両方が表示される場合があります。",
+            "different": "コピーの本文が異なります。どちらのコピーが正しいか確認してください。",
+            "nearly": "2つのコピーは{count, plural, other {#文字}}異なります。",
+            "openOther": "もう一方のコピーを開く",
+            "same": "2つのコピーの本文は同じです。元のファイルで同じページが繰り返されている可能性があります。",
+            "title": "条文番号の重複",
+            "titleCase": "事件番号の重複"
+          },
+          "missingFields": {
+            "body": "先頭{lines, number}行から{fields}を読み取れませんでした。判決は取り込まれますが、これらの詳細は空欄のままです。",
+            "title": "判決の詳細が見つかりません"
+          },
+          "nextMissing": {
+            "bodyOne": "この条文の後に、条文 {numberText}（{number}）がファイル内にありません。",
+            "bodyRange": "この条文の後に、条文 {fromText}–{toText}（{from}–{to}）がファイル内にありません。",
+            "noSuspect": "スキャン時にページが抜けたか、見出しが読み取れない可能性があります。",
+            "showLine": "本文で表示",
+            "suspect": "その本文がこのファイル内にある可能性があります。{line, number}行目が見出しのようです：「{text}」",
+            "title": "次の条文が見つかりません"
+          },
+          "numberRepaired": {
+            "body": "ファイル内の見出しは {source} です。前後の条文が {previous} と {next} のため、このファイルは条文 {used} として保存されます。",
+            "bodyEdge": "ファイル内の見出しは {source} です。このファイルは条文 {used} として保存されます。",
+            "title": "条文番号を前後の順序から修正"
+          },
+          "outOfSequence": {
+            "body": "この条文の番号は {number} ですが、前後の条文は {previous} と {next} です。番号は記載どおりに保存されます。",
+            "bodyEdge": "この条文番号は前後の条文の順序に合いません。番号は記載どおりに保存されます。",
+            "title": "条文番号の順序違い"
+          }
+        },
+        "keptWhole": {
+          "autoTooFew": "自動検出で{found, plural, other {#件の条文}}が見つかりました。ファイルを分割するのは{minimum, number}件以上見つかった場合だけです。短い法令は1つのドキュメントのままで問題ありません。",
+          "notSplit": "このファイルは1つのドキュメントとして取り込まれます。",
+          "splitAs": "{profile} として分割",
+          "title": "1つのファイルのまま",
+          "tooFewUnits": "{profile} で{found, plural, other {#件}}見つかりました。分割するには{minimum, number}件以上必要です。",
+          "uploadAlone": "分割するには、このファイルだけをアップロードして {profile} を選択してください。"
+        },
+        "list": {
+          "dateNotFound": "日付が見つかりません",
+          "decisionTitle": "{caseNumber} · {applicant} 対 {respondent}",
+          "frontMatterArticles": "最初の条文より前のテキスト",
+          "frontMatterDecisions": "最初の判決より前のテキスト",
+          "gapOne": "{numberText}（{number}）はファイル内にありません",
+          "gapRange": "{fromText}–{toText}（{from}–{to}）はファイル内にありません",
+          "keys": "↑↓ 移動 · スペース チェック · / 検索",
+          "markAll": "{count, plural, other {#件のファイル}}をチェック済みにする",
+          "missingValue": "—",
+          "noResults": {
+            "description": "条文番号（109 または ፩፻፱）、見出し、事件番号、当事者名で検索できます。",
+            "filterTitle": "この問題があるファイルはありません",
+            "title": "「{query}」に一致するファイルはありません"
+          },
+          "search": "番号、見出し、当事者で検索",
+          "showing": "{total, number}件中{shown, number}件を表示"
+        },
+        "loading": "{count, plural, other {#件のファイル}}を読み取り中…",
+        "reader": {
+          "articleMeta": "第{number}条 · {chars, plural, other {#文字}}",
+          "chars": "{chars, plural, other {#文字}}",
+          "checked": "チェック済み",
+          "decisionMeta": "{date} · {chars, plural, other {#文字}}",
+          "empty": "左側でファイルを選択すると、内容を読めます。",
+          "fixHint": "このファイルを修正するには、コネクターを作成してから、コネクターのファイル一覧で {fileName} を編集または削除してください。",
+          "frontMatterTitle": "冒頭部分",
+          "headerWindow": "詳細はこれらの行から読み取られます",
+          "markChecked": "チェック済みにする",
+          "next": "次へ（↓）",
+          "nextStart": "次のファイルの冒頭 · {label}",
+          "position": "{index, number} / {total, number}",
+          "previous": "前へ（↑）",
+          "previousEnd": "前のファイルの末尾 · {label}",
+          "truncated": "最初の{shown, number}文字を表示しています。全{total, number}文字が取り込まれます。",
+          "undo": "クリックして元に戻す"
+        },
+        "source": {
+          "articles": "{count, plural, other {#件の条文}}",
+          "budgetExceeded": "一部のファイルは、ここでは最初の2,000文字だけを表示します。全文が取り込まれます。",
+          "chapters": "{count, plural, other {#個の章}}",
+          "decisions": "{count, plural, other {#件の判決}}",
+          "detected": "{profile}（自動検出）",
+          "frontMatter": "冒頭部分",
+          "noIssues": "問題は見つかりませんでした",
+          "splitAs": "分割プロファイル",
+          "volume": "第{volume}巻"
+        },
+        "tab": {
+          "keptWhole": "{name} · 1つのファイルのまま",
+          "label": "{name} · {toCheck, plural, =0 {問題なし} other {要チェック #件}}",
+          "notSplit": "{name} · 未分割"
+        },
+        "tag": {
+          "checked": "チェック済み",
+          "duplicate": "番号重複",
+          "missingFields": "詳細なし",
+          "nextMissing": "次の条文なし",
+          "numberRepaired": "番号修正",
+          "outOfSequence": "順序違い"
+        },
+        "title": "分割結果の確認",
+        "unsupported": {
+          "body": "分割できるのは .md、.txt、.docx ファイルだけです。{name} は1つのドキュメントとして取り込まれます。",
+          "title": "未分割"
         }
       },
       "selector": {

@@ -2,7 +2,7 @@
 
 Used by the File connector upload routes. The split itself is pure text
 processing (`onyx.file_processing.legal`); this module reads the upload, stores
-each unit through the file store, and builds the summaries the UI shows.
+each unit through the file store, and builds the upload summary. The review lives in split_preview.py.
 """
 
 import hashlib
@@ -21,7 +21,6 @@ from onyx.file_processing.extract_file_text import (
     read_text_file,
 )
 from onyx.file_processing.legal.ethiopian_legal_splitter import (
-    LegalUnitType,
     SplitProfile,
     SplitResult,
     split_legal_text,
@@ -33,11 +32,7 @@ from onyx.file_processing.legal.materialize import (
     render_unit,
 )
 from onyx.file_store.file_store import FileStore
-from onyx.server.documents.models import (
-    SplitPreviewSource,
-    SplitPreviewUnit,
-    SplitSummary,
-)
+from onyx.server.documents.models import SplitSummary
 from onyx.utils.logger import setup_logger
 
 logger = setup_logger()
@@ -47,7 +42,6 @@ SPLITTABLE_EXTENSIONS = {".md", ".mdx", ".txt", ".docx"}
 EDITABLE_EXTENSIONS = {".md", ".mdx", ".txt"}
 
 _MAX_WARNINGS = 50
-_MAX_PREVIEW_UNITS = 50
 
 # Source-header keys that are not passed on to the units as tags.
 _RESERVED_SOURCE_KEYS = {
@@ -150,41 +144,6 @@ def build_split_summary(planned: PlannedSplit) -> SplitSummary:
         profile=planned.result.profile.value,
         unit_count=len(planned.result.units),
         warnings=_capped_warnings(planned.result.warnings),
-    )
-
-
-def build_split_preview(planned: PlannedSplit) -> SplitPreviewSource:
-    units = planned.result.units
-    return SplitPreviewSource(
-        source_name=planned.source_name,
-        splittable=True,
-        profile=planned.result.profile.value,
-        unit_count=len(units),
-        article_count=sum(
-            1 for u in units if u.unit_type != LegalUnitType.FRONT_MATTER
-        ),
-        units=[
-            SplitPreviewUnit(
-                unit_id=unit.unit_id,
-                display_name=unit.display_name,
-                unit_type=unit.unit_type.value,
-                chars=len(unit.text),
-            )
-            for unit in units[:_MAX_PREVIEW_UNITS]
-        ],
-        warnings=_capped_warnings(planned.result.warnings),
-    )
-
-
-def unsplittable_preview(file_name: str) -> SplitPreviewSource:
-    return SplitPreviewSource(
-        source_name=file_name,
-        splittable=False,
-        profile=SplitProfile.NONE.value,
-        unit_count=0,
-        article_count=0,
-        units=[],
-        warnings=[],
     )
 
 

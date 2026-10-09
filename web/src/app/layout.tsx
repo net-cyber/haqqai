@@ -12,7 +12,7 @@ import {
   WebVitals,
 } from "@/lib/analytics/shared";
 import Script from "next/script";
-import { DM_Mono, Hanken_Grotesk } from "next/font/google";
+import { DM_Mono, Hanken_Grotesk, Noto_Sans_Ethiopic } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import StatsOverlayLoader from "@/components/dev/StatsOverlayLoader";
@@ -36,6 +36,17 @@ const hankenGrotesk = Hanken_Grotesk({
   subsets: ["latin"],
   display: "swap",
   fallback: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto"],
+});
+
+// Ethiopic letters and Ge'ez numerals (U+1200–U+1399). System fonts often lack
+// the numerals and render them as boxes. No `weight`, so the variable font loads
+// and Opal's 450 weight renders exactly. No fallback list: it sits after the
+// Latin family in the composed variables below, so Latin never uses it.
+const notoSansEthiopic = Noto_Sans_Ethiopic({
+  subsets: ["ethiopic"],
+  display: "swap",
+  adjustFontFallback: false,
+  fallback: [],
 });
 
 const dmMono = DM_Mono({
@@ -98,8 +109,8 @@ export default async function Layout({ children }: LayoutProps) {
       // through these.
       style={
         {
-          "--font-hanken-grotesk": `${hankenGrotesk.style.fontFamily}, var(--font-cjk-sans), sans-serif`,
-          "--font-dm-mono": `${dmMono.style.fontFamily}, var(--font-cjk-sans), monospace`,
+          "--font-hanken-grotesk": `${hankenGrotesk.style.fontFamily}, ${notoSansEthiopic.style.fontFamily}, var(--font-cjk-sans), sans-serif`,
+          "--font-dm-mono": `${dmMono.style.fontFamily}, ${notoSansEthiopic.style.fontFamily}, var(--font-cjk-sans), monospace`,
         } as React.CSSProperties
       }
       suppressHydrationWarning

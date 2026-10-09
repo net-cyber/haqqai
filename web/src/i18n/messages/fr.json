@@ -8385,18 +8385,6 @@
     "legalSplit": {
       "createdToast": "{files, plural, one {# fichier créé} other {# fichiers créés}} à partir de {sources, plural, one {# fichier juridique} other {# fichiers juridiques}}",
       "keptWholeToast": "{source} a été enregistré comme un seul fichier : aucun article ni aucune décision trouvés",
-      "preview": {
-        "button": "Aperçu du découpage",
-        "failed": "Impossible d’afficher l’aperçu du découpage : {message}",
-        "loading": "Lecture des fichiers…",
-        "moreUnits": "…et {count, plural, one {# autre} other {# autres}}",
-        "noFiles": "Sélectionnez d’abord un fichier.",
-        "notSplit": "{source} : aucun article ni aucune décision trouvés. Le fichier reste entier.",
-        "split": "{source} : {count, plural, one {# fichier} other {# fichiers}} en tant que {profile}",
-        "title": "Aperçu du découpage",
-        "unsupported": "{source} : ce type de fichier n’est pas découpé.",
-        "warnings": "{count, plural, one {# avertissement} other {# avertissements}}"
-      },
       "profiles": {
         "auto": {
           "description": "Détecter la structure à partir du texte",
@@ -8417,6 +8405,174 @@
         "proclamation": {
           "description": "Un fichier par article አንቀጽ, avec le contexte du chapitre et de la section",
           "label": "Articles de proclamation"
+        }
+      },
+      "review": {
+        "description": "Contrôlez chaque fichier tel que HaqqAI va le stocker. Rien n’est enregistré tant que vous n’avez pas créé le connecteur.",
+        "empty": {
+          "title": "Aucun fichier à vérifier",
+          "description": "Revenez au formulaire et sélectionnez à nouveau les fichiers."
+        },
+        "entry": {
+          "checked": "{count, plural, one {# contrôlé} other {# contrôlés}}",
+          "files": "{count, plural, one {# fichier} other {# fichiers}}",
+          "keptWhole": "Conservé en un seul fichier",
+          "noFiles": "Sélectionnez d’abord un fichier.",
+          "noIssues": "Aucun problème",
+          "notSplit": "Non découpé",
+          "open": "Examiner le découpage",
+          "reopen": "Ouvrir l’examen",
+          "toCheck": "{count, plural, other {# à contrôler}}"
+        },
+        "failed": {
+          "retry": "Réessayer",
+          "title": "Impossible de lire les fichiers"
+        },
+        "field": {
+          "applicant": "Demandeur",
+          "book": "Livre",
+          "caseNumber": "N° de dossier",
+          "chapter": "Chapitre",
+          "court": "Juridiction",
+          "date": "Date",
+          "missingValue": "—",
+          "nameApplicant": "demandeur",
+          "nameDate": "date",
+          "nameRespondent": "défendeur",
+          "notFound": "Introuvable dans les {lines, number} premières lignes de la décision",
+          "part": "Partie",
+          "respondent": "Défendeur",
+          "section": "Section",
+          "size": "Taille",
+          "storedAs": "Stocké sous",
+          "subsection": "Sous-section",
+          "volume": "Volume"
+        },
+        "filter": {
+          "all": "Tous {count, number}",
+          "duplicate": "Utilisé deux fois {count, number}",
+          "missingFields": "Informations introuvables {count, number}",
+          "nextMissing": "Suivant introuvable {count, number}",
+          "numberRepaired": "Numéro corrigé {count, number}",
+          "outOfSequence": "Hors séquence {count, number}",
+          "tierCheck": "Découpage peut-être incorrect",
+          "tierFixed": "Corrigé par l’outil de découpage",
+          "toCheck": "À contrôler {count, number}"
+        },
+        "footer": {
+          "back": "Retour au formulaire",
+          "create": "Créer le connecteur ({count, plural, one {# fichier} other {# fichiers}})",
+          "createPending": "Créer le connecteur",
+          "creates": "Crée {files, plural, one {# fichier} other {# fichiers}} à partir de {sources, plural, one {# fichier envoyé} other {# fichiers envoyés}}",
+          "nothingToCheck": "Rien à contrôler · {creates}",
+          "progress": "Contrôle : {checked, number} sur {total, plural, one {# fichier} other {# fichiers}} · {creates}"
+        },
+        "issue": {
+          "duplicate": {
+            "body": "{label} est aussi stocké sous {otherFile}. La recherche peut renvoyer les deux.",
+            "different": "Les copies ont un texte différent. Vérifiez quelle copie est la bonne.",
+            "nearly": "Les copies diffèrent de {count, plural, one {# caractère} other {# caractères}}.",
+            "openOther": "Ouvrir l’autre copie",
+            "same": "Les deux copies ont le même texte. Le fichier source répète peut-être une page.",
+            "title": "Numéro d’article utilisé deux fois",
+            "titleCase": "Numéro de dossier utilisé deux fois"
+          },
+          "missingFields": {
+            "body": "Impossible de lire ces informations dans les {lines, number} premières lignes : {fields}. La décision est importée, et ces informations restent vides.",
+            "title": "Informations de la décision introuvables"
+          },
+          "nextMissing": {
+            "bodyOne": "L’article {numberText} ({number}) ne figure pas dans le fichier après cet article.",
+            "bodyRange": "Les articles {fromText}–{toText} ({from}–{to}) ne figurent pas dans le fichier après cet article.",
+            "noSuspect": "Le scan a peut-être sauté une page, ou l’intitulé est peut-être illisible.",
+            "showLine": "Afficher dans le texte",
+            "suspect": "Son texte se trouve peut-être dans ce fichier. La ligne {line, number} ressemble à son intitulé : « {text} »",
+            "title": "Article suivant introuvable"
+          },
+          "numberRepaired": {
+            "body": "L’intitulé dans le fichier indique {source}. Les articles précédent et suivant sont {previous} et {next}, donc ce fichier est stocké comme article {used}.",
+            "bodyEdge": "L’intitulé dans le fichier indique {source}. Ce fichier est stocké comme article {used}.",
+            "title": "Numéro d’article corrigé d’après la séquence"
+          },
+          "outOfSequence": {
+            "body": "Cet article porte le numéro {number}, mais les articles précédent et suivant sont {previous} et {next}. Il est stocké avec le numéro tel qu’il est écrit.",
+            "bodyEdge": "Ce numéro d’article ne suit pas l’ordre des articles qui l’entourent. Il est stocké avec le numéro tel qu’il est écrit.",
+            "title": "Numéro d’article hors séquence"
+          }
+        },
+        "keptWhole": {
+          "autoTooFew": "La détection automatique a trouvé {found, plural, one {# article} other {# articles}}. Elle découpe un fichier seulement si elle en trouve au moins {minimum, number}. Une loi courte fonctionne bien comme un seul document.",
+          "notSplit": "Ce fichier est importé comme un seul document.",
+          "splitAs": "Découper avec le profil {profile}",
+          "title": "Conservé en un seul fichier",
+          "tooFewUnits": "{profile} a trouvé {found, plural, one {# unité} other {# unités}}. Un fichier doit en avoir au moins {minimum, number} pour être découpé.",
+          "uploadAlone": "Pour le découper, envoyez-le seul et choisissez {profile}."
+        },
+        "list": {
+          "dateNotFound": "Date introuvable",
+          "decisionTitle": "{caseNumber} · {applicant} c. {respondent}",
+          "frontMatterArticles": "Texte avant le premier article",
+          "frontMatterDecisions": "Texte avant la première décision",
+          "gapOne": "{numberText} ({number}) absent du fichier",
+          "gapRange": "{fromText}–{toText} ({from}–{to}) absents du fichier",
+          "keys": "↑↓ naviguer · Espace contrôler · / rechercher",
+          "markAll": "Marquer {count, plural, one {# fichier comme contrôlé} other {# fichiers comme contrôlés}}",
+          "missingValue": "—",
+          "noResults": {
+            "description": "Recherchez par numéro d’article (109 ou ፩፻፱), intitulé, numéro de dossier ou nom de partie.",
+            "filterTitle": "Aucun fichier ne présente ce problème",
+            "title": "Aucun fichier ne correspond à « {query} »"
+          },
+          "search": "Rechercher un numéro, un intitulé ou une partie",
+          "showing": "Affichage de {shown, number} sur {total, number}"
+        },
+        "loading": "Lecture de {count, plural, one {# fichier} other {# fichiers}}…",
+        "reader": {
+          "articleMeta": "Article {number} · {chars, plural, one {# caractère} other {# caractères}}",
+          "chars": "{chars, plural, one {# caractère} other {# caractères}}",
+          "checked": "Contrôlé",
+          "decisionMeta": "{date} · {chars, plural, one {# caractère} other {# caractères}}",
+          "empty": "Sélectionnez un fichier à gauche pour le lire.",
+          "fixHint": "Pour corriger ce fichier, créez le connecteur, puis modifiez ou supprimez {fileName} dans la liste des fichiers du connecteur.",
+          "frontMatterTitle": "Texte liminaire",
+          "headerWindow": "Les informations sont lues dans ces lignes",
+          "markChecked": "Marquer comme contrôlé",
+          "next": "Suivant (↓)",
+          "nextStart": "Début du fichier suivant · {label}",
+          "position": "{index, number} / {total, number}",
+          "previous": "Précédent (↑)",
+          "previousEnd": "Fin du fichier précédent · {label}",
+          "truncated": "Affichage des {shown, number} premiers caractères. Les {total, number} caractères seront tous importés.",
+          "undo": "Cliquez pour annuler"
+        },
+        "source": {
+          "articles": "{count, plural, one {# article} other {# articles}}",
+          "budgetExceeded": "Certains fichiers n’affichent ici que leurs 2 000 premiers caractères. Le texte complet est importé.",
+          "chapters": "{count, plural, one {# chapitre} other {# chapitres}}",
+          "decisions": "{count, plural, one {# décision} other {# décisions}}",
+          "detected": "{profile} (détecté)",
+          "frontMatter": "Texte liminaire",
+          "noIssues": "Aucun problème trouvé",
+          "splitAs": "Profil de découpage",
+          "volume": "Volume {volume}"
+        },
+        "tab": {
+          "keptWhole": "{name} · conservé en entier",
+          "label": "{name} · {toCheck, plural, =0 {aucun problème} other {# à contrôler}}",
+          "notSplit": "{name} · non découpé"
+        },
+        "tag": {
+          "checked": "Contrôlé",
+          "duplicate": "Utilisé deux fois",
+          "missingFields": "Informations introuvables",
+          "nextMissing": "Suivant introuvable",
+          "numberRepaired": "Numéro corrigé",
+          "outOfSequence": "Hors séquence"
+        },
+        "title": "Examen du découpage",
+        "unsupported": {
+          "body": "Seuls les fichiers .md, .txt et .docx peuvent être découpés. {name} est importé comme un seul document.",
+          "title": "Non découpé"
         }
       },
       "selector": {

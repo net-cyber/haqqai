@@ -8385,18 +8385,6 @@
     "legalSplit": {
       "createdToast": "تم إنشاء {files, plural, one {ملف واحد} other {# ملفات}} من {sources, plural, one {ملف قانوني واحد} other {# ملفات قانونية}}",
       "keptWholeToast": "تم حفظ {source} كملف واحد: لم يتم العثور على مواد أو قرارات",
-      "preview": {
-        "button": "معاينة التقسيم",
-        "failed": "تعذّرت معاينة التقسيم: {message}",
-        "loading": "جارٍ قراءة الملفات…",
-        "moreUnits": "…و{count, plural, one {واحد آخر} other {# أخرى}}",
-        "noFiles": "اختر ملفًا أولًا.",
-        "notSplit": "{source}: لم يتم العثور على مواد أو قرارات. يبقى الملف كاملًا.",
-        "split": "{source}: {count, plural, one {ملف واحد} other {# ملفات}} بصيغة {profile}",
-        "title": "معاينة التقسيم",
-        "unsupported": "{source}: لا يتم تقسيم هذا النوع من الملفات.",
-        "warnings": "{count, plural, one {تحذير واحد} other {# تحذيرات}}"
-      },
       "profiles": {
         "auto": {
           "description": "اكتشاف البنية من النص",
@@ -8417,6 +8405,174 @@
         "proclamation": {
           "description": "ملف لكل مادة አንቀጽ مع سياق الفصل والقسم",
           "label": "مواد الإعلان"
+        }
+      },
+      "review": {
+        "description": "افحص كل ملف كما سيحفظه HaqqAI. لا يُحفظ أي شيء حتى تنشئ الموصل.",
+        "empty": {
+          "title": "لا توجد ملفات للمراجعة",
+          "description": "ارجع إلى النموذج واختر الملفات مرة أخرى."
+        },
+        "entry": {
+          "checked": "{count, plural, other {تم فحص #}}",
+          "files": "{count, plural, zero {لا ملفات} one {ملف واحد} two {ملفان} few {# ملفات} many {# ملفًا} other {# ملف}}",
+          "keptWhole": "أُبقي كملف واحد",
+          "noFiles": "اختر ملفًا أولًا.",
+          "noIssues": "لا توجد مشكلات",
+          "notSplit": "لم يُقسَّم",
+          "open": "مراجعة التقسيم",
+          "reopen": "فتح المراجعة",
+          "toCheck": "{count, plural, other {# بانتظار الفحص}}"
+        },
+        "failed": {
+          "retry": "حاول مرة أخرى",
+          "title": "تعذّرت قراءة الملفات"
+        },
+        "field": {
+          "applicant": "الطاعن",
+          "book": "الكتاب",
+          "caseNumber": "رقم القضية",
+          "chapter": "الفصل",
+          "court": "المحكمة",
+          "date": "التاريخ",
+          "missingValue": "—",
+          "nameApplicant": "الطاعن",
+          "nameDate": "التاريخ",
+          "nameRespondent": "المطعون ضده",
+          "notFound": "غير موجود في أول {lines, number} من أسطر القرار",
+          "part": "الجزء",
+          "respondent": "المطعون ضده",
+          "section": "القسم",
+          "size": "الحجم",
+          "storedAs": "يُحفظ باسم",
+          "subsection": "القسم الفرعي",
+          "volume": "المجلد"
+        },
+        "filter": {
+          "all": "الكل {count, number}",
+          "duplicate": "مستخدم مرتين {count, number}",
+          "missingFields": "التفاصيل غير موجودة {count, number}",
+          "nextMissing": "التالية غير موجودة {count, number}",
+          "numberRepaired": "رقم مُصحَّح {count, number}",
+          "outOfSequence": "خارج الترتيب {count, number}",
+          "tierCheck": "قد يكون التقسيم خاطئًا",
+          "tierFixed": "صحّحتها أداة التقسيم",
+          "toCheck": "بانتظار الفحص {count, number}"
+        },
+        "footer": {
+          "back": "العودة إلى النموذج",
+          "create": "إنشاء الموصل ({count, plural, zero {لا ملفات} one {ملف واحد} two {ملفان} few {# ملفات} many {# ملفًا} other {# ملف}})",
+          "createPending": "إنشاء الموصل",
+          "creates": "يُنشئ {files, plural, one {ملفًا واحدًا} two {ملفين} few {# ملفات} many {# ملفًا} other {# ملف}} من {sources, plural, one {ملف مرفوع واحد} two {ملفين مرفوعين} few {# ملفات مرفوعة} many {# ملفًا مرفوعًا} other {# ملف مرفوع}}",
+          "nothingToCheck": "لا شيء للفحص · {creates}",
+          "progress": "تم فحص {checked, number} من {total, plural, one {ملف واحد} two {ملفين} few {# ملفات} many {# ملفًا} other {# ملف}} · {creates}"
+        },
+        "issue": {
+          "duplicate": {
+            "body": "يُحفظ {label} أيضًا باسم {otherFile}. قد يعرض البحث النسختين معًا.",
+            "different": "نص النسختين مختلف. افحص أي نسخة هي الصحيحة.",
+            "nearly": "تختلف النسختان في {count, plural, one {حرف واحد} two {حرفين} few {# أحرف} many {# حرفًا} other {# حرف}}.",
+            "openOther": "فتح النسخة الأخرى",
+            "same": "نص النسختين متطابق. ربما يكرر الملف المصدر صفحة.",
+            "title": "رقم المادة مستخدم مرتين",
+            "titleCase": "رقم القضية مستخدم مرتين"
+          },
+          "missingFields": {
+            "body": "تعذّرت قراءة {fields} في أول {lines, number} من الأسطر. يُستورد القرار، وتبقى هذه التفاصيل فارغة.",
+            "title": "تفاصيل القرار غير موجودة"
+          },
+          "nextMissing": {
+            "bodyOne": "المادة {numberText} ({number}) غير موجودة في الملف بعد هذه المادة.",
+            "bodyRange": "المواد {fromText}–{toText} ({from}–{to}) غير موجودة في الملف بعد هذه المادة.",
+            "noSuspect": "ربما تخطّى المسح الضوئي صفحة، أو ربما يكون العنوان غير مقروء.",
+            "showLine": "إظهار في النص",
+            "suspect": "قد يكون نصها داخل هذا الملف. يبدو السطر {line, number} كأنه عنوانها: «{text}»",
+            "title": "المادة التالية غير موجودة"
+          },
+          "numberRepaired": {
+            "body": "العنوان في الملف هو {source}. المادتان قبلها وبعدها هما {previous} و{next}، لذا يُحفظ هذا الملف بوصفه المادة {used}.",
+            "bodyEdge": "العنوان في الملف هو {source}. يُحفظ هذا الملف بوصفه المادة {used}.",
+            "title": "رقم المادة مُصحَّح حسب التسلسل"
+          },
+          "outOfSequence": {
+            "body": "رقم هذه المادة {number}، لكن المادتين قبلها وبعدها هما {previous} و{next}. تُحفظ بالرقم كما هو مكتوب.",
+            "bodyEdge": "رقم هذه المادة لا يتوافق مع ترتيب المواد المحيطة بها. تُحفظ بالرقم كما هو مكتوب.",
+            "title": "رقم المادة خارج الترتيب"
+          }
+        },
+        "keptWhole": {
+          "autoTooFew": "عثر «اكتشاف تلقائي» على {found, plural, one {مادة واحدة} two {مادتين} few {# مواد} many {# مادة} other {# مادة}}. لا يقسّم الملف إلا إذا عثر على {minimum, number} أو أكثر. يصلح القانون القصير كمستند واحد.",
+          "notSplit": "يُستورد هذا الملف كمستند واحد.",
+          "splitAs": "التقسيم حسب {profile}",
+          "title": "أُبقي كملف واحد",
+          "tooFewUnits": "عثر {profile} على {found, plural, one {وحدة واحدة} two {وحدتين} few {# وحدات} many {# وحدة} other {# وحدة}}. يحتاج الملف إلى {minimum, number} على الأقل لكي يُقسَّم.",
+          "uploadAlone": "لتقسيمه، ارفعه وحده واختر {profile}."
+        },
+        "list": {
+          "dateNotFound": "التاريخ غير موجود",
+          "decisionTitle": "{caseNumber} · {applicant} ضد {respondent}",
+          "frontMatterArticles": "النص قبل المادة الأولى",
+          "frontMatterDecisions": "النص قبل القرار الأول",
+          "gapOne": "{numberText} ({number}) غير موجودة في الملف",
+          "gapRange": "{fromText}–{toText} ({from}–{to}) غير موجودة في الملف",
+          "keys": "↑↓ للتنقل · مسافة للفحص · / للبحث",
+          "markAll": "وضع علامة الفحص على {count, plural, one {ملف واحد} two {ملفين} few {# ملفات} many {# ملفًا} other {# ملف}}",
+          "missingValue": "—",
+          "noResults": {
+            "description": "ابحث برقم المادة (109 أو ፩፻፱) أو العنوان أو رقم القضية أو اسم الطرف.",
+            "filterTitle": "لا يوجد ملف بهذه المشكلة",
+            "title": "لا يوجد ملف يطابق «{query}»"
+          },
+          "search": "ابحث بالرقم أو العنوان أو الطرف",
+          "showing": "عرض {shown, number} من {total, number}"
+        },
+        "loading": "جارٍ قراءة {count, plural, one {ملف واحد} two {ملفين} few {# ملفات} many {# ملفًا} other {# ملف}}…",
+        "reader": {
+          "articleMeta": "المادة {number} · {chars, plural, one {حرف واحد} two {حرفان} few {# أحرف} many {# حرفًا} other {# حرف}}",
+          "chars": "{chars, plural, one {حرف واحد} two {حرفان} few {# أحرف} many {# حرفًا} other {# حرف}}",
+          "checked": "تم الفحص",
+          "decisionMeta": "{date} · {chars, plural, one {حرف واحد} two {حرفان} few {# أحرف} many {# حرفًا} other {# حرف}}",
+          "empty": "اختر ملفًا من القائمة لقراءته.",
+          "fixHint": "لإصلاح هذا الملف، أنشئ الموصل، ثم عدّل {fileName} أو احذفه من قائمة ملفات الموصل.",
+          "frontMatterTitle": "النص التمهيدي",
+          "headerWindow": "تُقرأ التفاصيل من هذه الأسطر",
+          "markChecked": "وضع علامة الفحص",
+          "next": "التالي (↓)",
+          "nextStart": "بداية الملف التالي · {label}",
+          "position": "{index, number} / {total, number}",
+          "previous": "السابق (↑)",
+          "previousEnd": "نهاية الملف السابق · {label}",
+          "truncated": "يُعرض أول {shown, number} من الأحرف. ستُستورد جميع الأحرف ({total, number}).",
+          "undo": "انقر للتراجع"
+        },
+        "source": {
+          "articles": "{count, plural, one {مادة واحدة} two {مادتان} few {# مواد} many {# مادة} other {# مادة}}",
+          "budgetExceeded": "تعرض بعض الملفات هنا أول 2000 حرف فقط. يُستورد النص الكامل.",
+          "chapters": "{count, plural, one {فصل واحد} two {فصلان} few {# فصول} many {# فصلًا} other {# فصل}}",
+          "decisions": "{count, plural, one {قرار واحد} two {قراران} few {# قرارات} many {# قرارًا} other {# قرار}}",
+          "detected": "{profile} (اكتُشف تلقائيًا)",
+          "frontMatter": "النص التمهيدي",
+          "noIssues": "لم تُكتشف مشكلات",
+          "splitAs": "التقسيم حسب",
+          "volume": "المجلد {volume}"
+        },
+        "tab": {
+          "keptWhole": "{name} · أُبقي كملف واحد",
+          "label": "{name} · {toCheck, plural, =0 {لا توجد مشكلات} other {# بانتظار الفحص}}",
+          "notSplit": "{name} · لم يُقسَّم"
+        },
+        "tag": {
+          "checked": "تم الفحص",
+          "duplicate": "مستخدم مرتين",
+          "missingFields": "التفاصيل غير موجودة",
+          "nextMissing": "التالية غير موجودة",
+          "numberRepaired": "رقم مُصحَّح",
+          "outOfSequence": "خارج الترتيب"
+        },
+        "title": "مراجعة التقسيم",
+        "unsupported": {
+          "body": "يمكن تقسيم ملفات ‎.md و‎.txt و‎.docx فقط. يُستورد {name} كمستند واحد.",
+          "title": "لم يُقسَّم"
         }
       },
       "selector": {

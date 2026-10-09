@@ -8385,18 +8385,6 @@
     "legalSplit": {
       "createdToast": "{files, plural, one {# Datei} other {# Dateien}} aus {sources, plural, one {# Rechtsdatei} other {# Rechtsdateien}} erstellt",
       "keptWholeToast": "{source} wurde als eine Datei gespeichert: keine Artikel oder Entscheidungen gefunden",
-      "preview": {
-        "button": "Aufteilung anzeigen",
-        "failed": "Vorschau der Aufteilung fehlgeschlagen: {message}",
-        "loading": "Dateien werden gelesen…",
-        "moreUnits": "…und {count, plural, one {# weitere} other {# weitere}}",
-        "noFiles": "Wählen Sie zuerst eine Datei aus.",
-        "notSplit": "{source}: keine Artikel oder Entscheidungen gefunden. Die Datei bleibt ganz.",
-        "split": "{source}: {count, plural, one {# Datei} other {# Dateien}} als {profile}",
-        "title": "Vorschau der Aufteilung",
-        "unsupported": "{source}: Dieser Dateityp wird nicht aufgeteilt.",
-        "warnings": "{count, plural, one {# Warnung} other {# Warnungen}}"
-      },
       "profiles": {
         "auto": {
           "description": "Das Layout aus dem Text erkennen",
@@ -8417,6 +8405,174 @@
         "proclamation": {
           "description": "Eine Datei pro አንቀጽ-Artikel, mit Kapitel- und Abschnittskontext",
           "label": "Artikel einer Proklamation"
+        }
+      },
+      "review": {
+        "description": "Prüfen Sie jede Datei so, wie HaqqAI sie speichert. Erst wenn Sie den Konnektor erstellen, wird etwas gespeichert.",
+        "empty": {
+          "title": "Keine Dateien zu prüfen",
+          "description": "Kehren Sie zum Formular zurück und wählen Sie die Dateien erneut aus."
+        },
+        "entry": {
+          "checked": "{count, plural, other {# geprüft}}",
+          "files": "{count, plural, one {# Datei} other {# Dateien}}",
+          "keptWhole": "Als eine Datei behalten",
+          "noFiles": "Wählen Sie zuerst eine Datei aus.",
+          "noIssues": "Keine Probleme",
+          "notSplit": "Nicht aufgeteilt",
+          "open": "Aufteilung prüfen",
+          "reopen": "Prüfung öffnen",
+          "toCheck": "{count, plural, other {# zu prüfen}}"
+        },
+        "failed": {
+          "retry": "Erneut versuchen",
+          "title": "Die Dateien konnten nicht gelesen werden"
+        },
+        "field": {
+          "applicant": "Antragsteller",
+          "book": "Buch",
+          "caseNumber": "Aktenzeichen",
+          "chapter": "Kapitel",
+          "court": "Gericht",
+          "date": "Datum",
+          "missingValue": "—",
+          "nameApplicant": "Antragsteller",
+          "nameDate": "Datum",
+          "nameRespondent": "Antragsgegner",
+          "notFound": "Nicht in den ersten {lines, number} Zeilen der Entscheidung gefunden",
+          "part": "Teil",
+          "respondent": "Antragsgegner",
+          "section": "Abschnitt",
+          "size": "Größe",
+          "storedAs": "Gespeichert als",
+          "subsection": "Unterabschnitt",
+          "volume": "Band"
+        },
+        "filter": {
+          "all": "Alle {count, number}",
+          "duplicate": "Doppelt verwendet {count, number}",
+          "missingFields": "Angaben nicht gefunden {count, number}",
+          "nextMissing": "Nächster nicht gefunden {count, number}",
+          "numberRepaired": "Nummer korrigiert {count, number}",
+          "outOfSequence": "Falsche Reihenfolge {count, number}",
+          "tierCheck": "Möglicherweise falsch aufgeteilt",
+          "tierFixed": "Beim Aufteilen korrigiert",
+          "toCheck": "Zu prüfen {count, number}"
+        },
+        "footer": {
+          "back": "Zurück zum Formular",
+          "create": "Konnektor erstellen ({count, plural, one {# Datei} other {# Dateien}})",
+          "createPending": "Konnektor erstellen",
+          "creates": "Erstellt {files, plural, one {# Datei} other {# Dateien}} aus {sources, plural, one {# hochgeladenen Datei} other {# hochgeladenen Dateien}}",
+          "nothingToCheck": "Nichts zu prüfen · {creates}",
+          "progress": "{checked, number} von {total, plural, one {# Datei} other {# Dateien}} geprüft · {creates}"
+        },
+        "issue": {
+          "duplicate": {
+            "body": "{label} ist auch als {otherFile} gespeichert. Die Suche kann beide liefern.",
+            "different": "Die Kopien haben unterschiedlichen Text. Prüfen Sie, welche Kopie richtig ist.",
+            "nearly": "Die Kopien unterscheiden sich in {count, plural, one {# Zeichen} other {# Zeichen}}.",
+            "openOther": "Andere Kopie öffnen",
+            "same": "Beide Kopien haben denselben Text. Die Quelldatei wiederholt möglicherweise eine Seite.",
+            "title": "Artikelnummer doppelt verwendet",
+            "titleCase": "Aktenzeichen doppelt verwendet"
+          },
+          "missingFields": {
+            "body": "Diese Angaben konnten in den ersten {lines, number} Zeilen nicht gelesen werden: {fields}. Die Entscheidung wird importiert, diese Angaben bleiben leer.",
+            "title": "Angaben zur Entscheidung nicht gefunden"
+          },
+          "nextMissing": {
+            "bodyOne": "Artikel {numberText} ({number}) steht nach diesem Artikel nicht in der Datei.",
+            "bodyRange": "Die Artikel {fromText}–{toText} ({from}–{to}) stehen nach diesem Artikel nicht in der Datei.",
+            "noSuspect": "Beim Scannen wurde möglicherweise eine Seite übersprungen, oder die Überschrift ist nicht lesbar.",
+            "showLine": "Im Text anzeigen",
+            "suspect": "Sein Text steht möglicherweise in dieser Datei. Zeile {line, number} sieht wie seine Überschrift aus: „{text}“",
+            "title": "Nächster Artikel nicht gefunden"
+          },
+          "numberRepaired": {
+            "body": "Die Überschrift in der Datei lautet {source}. Die Artikel davor und danach sind {previous} und {next}, daher wird diese Datei als Artikel {used} gespeichert.",
+            "bodyEdge": "Die Überschrift in der Datei lautet {source}. Diese Datei wird als Artikel {used} gespeichert.",
+            "title": "Artikelnummer aus der Reihenfolge korrigiert"
+          },
+          "outOfSequence": {
+            "body": "Dieser Artikel hat die Nummer {number}, aber die Artikel davor und danach sind {previous} und {next}. Er wird mit der Nummer gespeichert, die im Text steht.",
+            "bodyEdge": "Die Nummer dieses Artikels passt nicht zur Reihenfolge der Artikel davor und danach. Der Artikel wird mit der Nummer gespeichert, die im Text steht.",
+            "title": "Artikelnummer in falscher Reihenfolge"
+          }
+        },
+        "keptWhole": {
+          "autoTooFew": "„Automatisch erkennen“ hat {found, plural, one {# Artikel} other {# Artikel}} gefunden. Eine Datei wird nur aufgeteilt, wenn mindestens {minimum, number} gefunden werden. Ein kurzes Gesetz funktioniert gut als ein Dokument.",
+          "notSplit": "Diese Datei wird als ein Dokument importiert.",
+          "splitAs": "Als {profile} aufteilen",
+          "title": "Als eine Datei behalten",
+          "tooFewUnits": "{profile} hat {found, plural, one {# Einheit} other {# Einheiten}} gefunden. Eine Datei braucht mindestens {minimum, number}, damit sie aufgeteilt wird.",
+          "uploadAlone": "Um sie aufzuteilen, laden Sie die Datei einzeln hoch und wählen Sie {profile}."
+        },
+        "list": {
+          "dateNotFound": "Datum nicht gefunden",
+          "decisionTitle": "{caseNumber} · {applicant} gegen {respondent}",
+          "frontMatterArticles": "Text vor dem ersten Artikel",
+          "frontMatterDecisions": "Text vor der ersten Entscheidung",
+          "gapOne": "{numberText} ({number}) nicht in der Datei",
+          "gapRange": "{fromText}–{toText} ({from}–{to}) nicht in der Datei",
+          "keys": "↑↓ wechseln · Leertaste markieren · / suchen",
+          "markAll": "{count, plural, one {# Datei} other {# Dateien}} als geprüft markieren",
+          "missingValue": "—",
+          "noResults": {
+            "description": "Suchen Sie nach Artikelnummer (109 oder ፩፻፱), Überschrift, Aktenzeichen oder Name einer Partei.",
+            "filterTitle": "Keine Datei hat dieses Problem",
+            "title": "Keine Datei passt zu „{query}“"
+          },
+          "search": "Nummer, Überschrift oder Partei suchen",
+          "showing": "{shown, number} von {total, number} angezeigt"
+        },
+        "loading": "{count, plural, one {# Datei wird} other {# Dateien werden}} gelesen…",
+        "reader": {
+          "articleMeta": "Artikel {number} · {chars, plural, one {# Zeichen} other {# Zeichen}}",
+          "chars": "{chars, plural, one {# Zeichen} other {# Zeichen}}",
+          "checked": "Geprüft",
+          "decisionMeta": "{date} · {chars, plural, one {# Zeichen} other {# Zeichen}}",
+          "empty": "Wählen Sie links eine Datei aus, um sie zu lesen.",
+          "fixHint": "Um diese Datei zu korrigieren, erstellen Sie den Konnektor. Bearbeiten oder löschen Sie dann {fileName} in der Dateiliste des Konnektors.",
+          "frontMatterTitle": "Vorspann",
+          "headerWindow": "Die Angaben werden aus diesen Zeilen gelesen",
+          "markChecked": "Als geprüft markieren",
+          "next": "Nächste (↓)",
+          "nextStart": "Anfang der nächsten Datei · {label}",
+          "position": "{index, number} / {total, number}",
+          "previous": "Vorherige (↑)",
+          "previousEnd": "Ende der vorherigen Datei · {label}",
+          "truncated": "Die ersten {shown, number} Zeichen werden angezeigt. Alle {total, number} Zeichen werden importiert.",
+          "undo": "Zum Rückgängigmachen klicken"
+        },
+        "source": {
+          "articles": "{count, plural, one {# Artikel} other {# Artikel}}",
+          "budgetExceeded": "Einige Dateien zeigen hier nur ihre ersten 2.000 Zeichen. Der vollständige Text wird importiert.",
+          "chapters": "{count, plural, one {# Kapitel} other {# Kapitel}}",
+          "decisions": "{count, plural, one {# Entscheidung} other {# Entscheidungen}}",
+          "detected": "{profile} (erkannt)",
+          "frontMatter": "Vorspann",
+          "noIssues": "Keine Probleme gefunden",
+          "splitAs": "Aufteilen als",
+          "volume": "Band {volume}"
+        },
+        "tab": {
+          "keptWhole": "{name} · als Ganzes behalten",
+          "label": "{name} · {toCheck, plural, =0 {keine Probleme} other {# zu prüfen}}",
+          "notSplit": "{name} · nicht aufgeteilt"
+        },
+        "tag": {
+          "checked": "Geprüft",
+          "duplicate": "Doppelt verwendet",
+          "missingFields": "Angaben nicht gefunden",
+          "nextMissing": "Nächster nicht gefunden",
+          "numberRepaired": "Nummer korrigiert",
+          "outOfSequence": "Falsche Reihenfolge"
+        },
+        "title": "Aufteilung prüfen",
+        "unsupported": {
+          "body": "Nur Dateien im Format .md, .txt und .docx können aufgeteilt werden. {name} wird als ein Dokument importiert.",
+          "title": "Nicht aufgeteilt"
         }
       },
       "selector": {

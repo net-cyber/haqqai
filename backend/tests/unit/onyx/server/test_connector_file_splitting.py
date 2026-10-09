@@ -155,14 +155,24 @@ def test_preview_does_not_store(store: _MemoryFileStore) -> None:
     )
 
     assert store.saved == []
+    assert not response.text_budget_exceeded
     cassation, pdf = response.sources
     assert (cassation.profile, cassation.unit_count, cassation.article_count) == (
         "cassation",
         4,
         4,
     )
-    assert cassation.units[0].unit_id == "case-94952"
+    assert cassation.requested_profile == "auto"
+    assert cassation.size_bytes == len(_fixture("cassation_small.md"))
+    first = cassation.units[0]
+    assert first.unit_id == "case-94952"
+    assert first.file_name == "vol__case-94952.md"
+    assert first.label == "ሰበር መ/ቁ 94952"
+    assert first.text.startswith("የሰበር መዘገብ ቁጥር 94952")
+    assert not first.text_truncated
     assert not pdf.splittable
+    assert pdf.kept_whole is not None
+    assert pdf.kept_whole.reason == "unsupported_type"
 
 
 def test_unknown_profile_is_rejected() -> None:
