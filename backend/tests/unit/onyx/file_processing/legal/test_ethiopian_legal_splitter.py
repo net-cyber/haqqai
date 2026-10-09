@@ -306,10 +306,14 @@ def test_damaged_article_word_and_ethiopic_separators_still_split() -> None:
             "ጽሑፍ።",
             "አአንቀፅ ' ፭ ። የሚጸናበት ጊዜ",
             "ጽሑፍ።",
+            "እንቀፅ፮. ተጨማሪ",
+            "ጽሑፍ።",
+            "አንቀፆ ፯ ማጠቃለያ",
+            "ጽሑፍ።",
         ]
     )
     result = split_legal_text(text, SplitProfile.PROCLAMATION)
-    assert [u.number for u in result.units if u.number] == [1, 2, 3, 4, 5]
+    assert [u.number for u in result.units if u.number] == [1, 2, 3, 4, 5, 6, 7]
 
 
 def _decision(case_number: str, parties: list[str]) -> str:
@@ -378,3 +382,27 @@ def test_decision_parties(
     # The searched lines end before the judgment.
     searched = unit.text.split("\n")[: unit.details_lines]
     assert not any(line.startswith("መዝገቡ") for line in searched)
+
+
+def test_parties_after_a_judgment_title_and_hidar_spelling() -> None:
+    text = "\n".join(
+        [
+            "ሰመ/ቁ 36210",
+            "ኀዳር 2 ቀን 2001 ዓ.ም.",
+            "ፍ ር ድ",
+            "ዳኞች፡- ዓብዱልቃድር መሐመድ",
+            "አመልካች፡- አቃቂ መለዋወጫ እቃዎች - አልቀረበም፡",
+            "ተጠሪ፡- አቶ ኃይለ ሳልቫልቶር - ቀርቧል፡፡",
+            "ጉዳዩ የተጀመረው በፌዴራል መጀመሪያ ደረጃ ፍ/ቤት ሲሆን ...።",
+            "ሰመ/ቁ 36211",
+            "ዳኞች፡- አቶ ሀ",
+            "አመልካች፡- አቶ ለ",
+            "ተጠሪ፡- አቶ ሐ",
+            "ፍርድ",
+            "ጉዳዩ ...።",
+        ]
+    )
+    unit = split_legal_text(text, SplitProfile.CASSATION).units[0]
+    assert unit.metadata["date"] == "ኀዳር 2 ቀን 2001 ዓ.ም"
+    assert unit.metadata["applicant"] == "አቃቂ መለዋወጫ እቃዎች"
+    assert unit.metadata["respondent"] == "አቶ ኃይለ ሳልቫልቶር"

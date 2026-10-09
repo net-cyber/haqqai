@@ -270,8 +270,8 @@ _GEEZ_RUN = r"[፩-፼]+"
 _ARTICLE_NUMBER = rf"(?:{_GEEZ_RUN}\s*ሺ\s*(?:{_GEEZ_RUN}|\d{{1,3}})?|ሺ\s*(?:{_GEEZ_RUN}|\d{{1,3}})?|{_GEEZ_RUN}|\d{{1,4}})"
 
 # Proclamation article: "አንቀጽ ፯ ዕድሜ". The number may sit on the next line.
-# "አንቀጽ", also as OCR damages it: "ንቀጽ", "አአንቀፅ", "አንቀቀፅ", "አንበፅ".
-_ARTICLE_WORD = r"(?:አ{1,2}ን|ን)(?:ቀ{1,2}|በ)[ጽፅ]"
+# "አንቀጽ", also as OCR damages it: "ንቀጽ", "አአንቀፅ", "እንቀፅ", "አንቀቀፅ", "አንበፅ", "አንቀፆ".
+_ARTICLE_WORD = r"(?:[አእ]{1,2}ን|ን)(?:ቀ{1,2}|በ)[ጽፅፀፆ]"
 _PROCLAMATION_ARTICLE_RE = re.compile(
     rf"^{_ARTICLE_WORD}{_SEP}(?P<num>{_ARTICLE_NUMBER})(?P<rest>.*)$"
 )
@@ -831,7 +831,7 @@ _VOLUME_RE = re.compile(r"^ቅ[ፅጽ]\s*[-:፡./]*\s*(?P<num>\d{1,3}|[፩-፼]+
 _COURT_BANNER_RE = re.compile(
     r"^(?:የፌዴራል\s+ጠቅላይ\s+ፍርድ\s+ቤት\s+ሰበር\s+(?:ሰሚ\s+)?ችሎት|ው[ሳሣ]ኔዎች)\s*[።፡]*$"
 )
-_ETHIOPIAN_MONTHS = "መስከረም|ጥቅምት|ኅዳር|ህዳር|ታኅሣሥ|ታህሳስ|ታሕሳስ|ታህሣሥ|ጥር|የካቲት|መጋቢት|ሚያዝያ|ግንቦት|ሰኔ|ሐምሌ|ሀምሌ|ነሐሴ|ነሀሴ|ጳጉሜ"
+_ETHIOPIAN_MONTHS = "መስከረም|ጥቅምት|ኅዳር|ኀዳር|ሕዳር|ህዳር|ታኅሣሥ|ታህሳስ|ታሕሳስ|ታህሣሥ|ጥር|የካቲት|መጋቢት|ሚያዝያ|ግንቦት|ሰኔ|ሐምሌ|ሀምሌ|ነሐሴ|ነሀሴ|ጳጉሜ"
 _DATE_RE = re.compile(
     rf"(?:{_ETHIOPIAN_MONTHS})|\d{{1,2}}\s*/\s*\d{{1,2}}\s*/\s*\d{{2,4}}|ዓ\s*[./]\s*ም"
 )
@@ -860,6 +860,7 @@ _HEADER_FIELD_RE = re.compile(
 )
 # The line after the parties: "መዝገቡ ተመርምሮ ...", "ይህ መዝገብ ...", "ፍርድ".
 _PARTIES_END_RE = re.compile(r"^(?:መዝገቡ|ይህ\s+መዝገብ|ፍ\s*ር\s*ድ\s*[።፡]*$)")
+_JUDGMENT_TITLE_RE = re.compile(r"^ፍ\s*ር\s*ድ\s*[።፡]*$")
 _PARTY_NOTE_RE = re.compile(
     r"\s*(?:[-–—]\s*)?(?:ቀረቡ|ቀረበች|ቀረበ|ቀርበዋል|አልቀረቡም|አልቀረበም|የቀረበ|ከ?ጠበቃ|ነገረ\s*ፈጅ|ወኪል|ተወካይ|በእ?ራሳቸው|በእ?ራሱ|በእ?ራሷ).*$"
 )
@@ -952,6 +953,14 @@ def _parties_block(block: list[_Line]) -> list[_Line]:
     parties: list[_Line] = []
     for line in block[1 : 1 + _CASE_HEADER_FIELD_WINDOW]:
         if _PARTIES_END_RE.match(line.clean):
+            # Some volumes print "ፍ ር ድ" above the judges and parties.
+            seen_party = any(
+                _APPLICANT_RE.match(p.clean) or _RESPONDENT_RE.match(p.clean)
+                for p in parties
+            )
+            if _JUDGMENT_TITLE_RE.match(line.clean) and not seen_party:
+                parties.append(line)
+                continue
             break
         is_field = _APPLICANT_RE.match(line.clean) or _RESPONDENT_RE.match(line.clean)
         if len(line.clean) > _MAX_PARTY_LINE_CHARS and not is_field:
