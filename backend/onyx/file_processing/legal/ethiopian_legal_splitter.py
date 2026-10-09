@@ -38,7 +38,10 @@ _MAX_NUMBERED_HEADING_CHARS = 60
 _CASE_CONFIRM_WINDOW = 10
 # Lines in a decision's header block (date, judges) are short.
 _MAX_HEADER_BLOCK_LINE_CHARS = 150
-_CASE_HEADER_FIELD_WINDOW = 15
+# Non-empty lines searched for the parties. The block usually ends earlier, at
+# the "መዝገቡ ተመርምሮ" or "ፍርድ" line.
+_CASE_HEADER_FIELD_WINDOW = 40
+_MAX_PARTY_LINE_CHARS = 200
 
 COURT_NAME = "የፌዴራል ጠቅላይ ፍርድ ቤት ሰበር ሰሚ ችሎት"
 
@@ -95,6 +98,10 @@ class LegalUnit:
     # The number as written in the source, when the splitter repaired it.
     repaired_from: str | None = None
     out_of_sequence: bool = False
+    # Decisions: raw lines of `text` searched for the date and parties.
+    details_lines: int = 0
+    # Decisions: the header names no respondent ("ተጠሪ፡- የለም", or no ተጠሪ line).
+    no_respondent: bool = False
 
 
 KeptWholeReason = Literal["auto_too_few", "too_few_units"]
@@ -257,15 +264,18 @@ def _slice_text(raw_lines: list[str], start: int, end: int) -> str:
 
 # --- Article headers -------------------------------------------------------
 
-_SEP = r"[\s.,:;፡።\-/()]*"
+# Ethiopic and OCR punctuation between a marker and its number: "አንቀፅ ፤ ፫".
+_SEP = r"[\s.,:;፡።፤፣፦'\"`“”‘’_\-/()]*"
 _GEEZ_RUN = r"[፩-፼]+"
 _ARTICLE_NUMBER = rf"(?:{_GEEZ_RUN}\s*ሺ\s*(?:{_GEEZ_RUN}|\d{{1,3}})?|ሺ\s*(?:{_GEEZ_RUN}|\d{{1,3}})?|{_GEEZ_RUN}|\d{{1,4}})"
 
 # Proclamation article: "አንቀጽ ፯ ዕድሜ". The number may sit on the next line.
+# "አንቀጽ", also as OCR damages it: "ንቀጽ", "አአንቀፅ", "አንቀቀፅ", "አንበፅ".
+_ARTICLE_WORD = r"(?:አ{1,2}ን|ን)(?:ቀ{1,2}|በ)[ጽፅ]"
 _PROCLAMATION_ARTICLE_RE = re.compile(
-    rf"^አንቀ[ጽፅ]{_SEP}(?P<num>{_ARTICLE_NUMBER})(?P<rest>.*)$"
+    rf"^{_ARTICLE_WORD}{_SEP}(?P<num>{_ARTICLE_NUMBER})(?P<rest>.*)$"
 )
-_BARE_ARTICLE_WORD_RE = re.compile(r"^አንቀ[ጽፅ]\s*[.:፡]?$")
+_BARE_ARTICLE_WORD_RE = re.compile(rf"^{_ARTICLE_WORD}\s*[.:፡]?$")
 _LEADING_NUMBER_RE = re.compile(rf"^(?P<num>{_ARTICLE_NUMBER})(?P<rest>.*)$")
 # "አንቀጽ ፳ ንዑስ አንቀጽ (፫) ..." is a cross-reference, not a header.
 _CROSS_REFERENCE_RE = re.compile(r"^\s*(?:ን[ዑኡ]ስ|(?:እና|ና|እስከ)(?=[\s፩-፼\d]|$)|፣|,)")
@@ -825,12 +835,33 @@ _ETHIOPIAN_MONTHS = "መስከረም|ጥቅምት|ኅዳር|ህዳር|ታኅሣ�
 _DATE_RE = re.compile(
     rf"(?:{_ETHIOPIAN_MONTHS})|\d{{1,2}}\s*/\s*\d{{1,2}}\s*/\s*\d{{2,4}}|ዓ\s*[./]\s*ም"
 )
-_APPLICANT_RE = re.compile(r"^አመልካ(?:ች|ቾች)\s*[፡፦:\-–—.…\s]*(?P<rest>.*)$")
-_RESPONDENT_RE = re.compile(r"^ተጠሪ(?:ዎች)?\s*[፡፦:\-–—.…\s]*(?P<rest>.*)$")
+_APPLICANT_LABEL = r"አመልካ(?:ች|ቾች|ቶች)"
+# Older volumes call the respondent "መልስ ሰጭ" or "መ/ሰጭ".
+_OLD_RESPONDENT_LABEL = r"(?:መልስ\s*ሰ[ጭጪ]|መ\s*/\s*ሰ[ጭጪ])(?:ዎች)?"
+_APPLICANT_RE = re.compile(rf"^{_APPLICANT_LABEL}\s*[፡፦:\-–—.…\s]*(?P<rest>.*)$")
+_RESPONDENT_RE = re.compile(
+    rf"^(?:ተጠሪ(?:ዎች)?\s*[፡፦:\-–—.…\s]*|{_OLD_RESPONDENT_LABEL}\s*[፡፦:]+[\-–—.…\s]*)(?P<rest>.*)$"
+)
+# A label inside a line, after other text: "... ቀርበዋል ተጠሪ፡- ወ/ሮ ታደለች ...".
+_APPLICANT_INLINE_RE = re.compile(
+    rf"(?<!\S){_APPLICANT_LABEL}\s*[፡፦:]+[\-–—.…\s፡፦:]*(?P<rest>.*)$"
+)
+_RESPONDENT_INLINE_RE = re.compile(
+    rf"(?<!\S)(?:ተጠሪ(?:ዎች)?|{_OLD_RESPONDENT_LABEL})\s*[፡፦:]+[\-–—.…\s፡፦:]*(?P<rest>.*)$"
+)
+# Where an inline value ends: the next label, or the start of the judgment.
+_NEXT_FIELD_RE = re.compile(
+    rf"(?<!\S)(?:(?:{_APPLICANT_LABEL}|ተጠሪ(?:ዎች)?|{_OLD_RESPONDENT_LABEL})\s*[፡፦:]|መዝገቡ)"
+)
+_NO_PARTY_RE = re.compile(r"^[\s.…\-–—፡፦:]*የለም")
 # Lines that end the parties block of a decision header.
-_HEADER_FIELD_RE = re.compile(r"^(?:ዳኞች|አመልካ|ተጠሪ|መዝገቡ|ፍ\s*ር\s*ድ)")
+_HEADER_FIELD_RE = re.compile(
+    rf"^(?:ዳኞች|አመልካ|ተጠሪ|{_OLD_RESPONDENT_LABEL}|መዝገቡ|ፍ\s*ር\s*ድ)"
+)
+# The line after the parties: "መዝገቡ ተመርምሮ ...", "ይህ መዝገብ ...", "ፍርድ".
+_PARTIES_END_RE = re.compile(r"^(?:መዝገቡ|ይህ\s+መዝገብ|ፍ\s*ር\s*ድ\s*[።፡]*$)")
 _PARTY_NOTE_RE = re.compile(
-    r"\s*(?:[-–—]\s*)?(?:ቀረቡ|ቀረበች|ቀረበ|ቀርበዋል|አልቀረቡም|አልቀረበም|የቀረበ|ጠበቃ|ነገረ\s*ፈጅ|ወኪል).*$"
+    r"\s*(?:[-–—]\s*)?(?:ቀረቡ|ቀረበች|ቀረበ|ቀርበዋል|አልቀረቡም|አልቀረበም|የቀረበ|ከ?ጠበቃ|ነገረ\s*ፈጅ|ወኪል|ተወካይ|በእ?ራሳቸው|በእ?ራሱ|በእ?ራሷ).*$"
 )
 _LIST_NUMBER_RE = re.compile(r"^\d{1,2}\s*(?:[.)]|ኛ)\s*")
 # A representative follows the party after a spaced dash: "ወ/ሮ X - ጠበቃ Y".
@@ -880,20 +911,53 @@ def _clean_party(value: str) -> str:
     return _shorten(value, _MAX_PARTY_CHARS)
 
 
-def _parse_party(lines: list[_Line], pattern: re.Pattern[str]) -> str:
+@dataclass
+class _Party:
+    name: str
+    # A label for this party is in the header, even when the name is empty.
+    labelled: bool
+    # The header says there is no such party: "ተጠሪ፡- የለም".
+    none: bool
+
+
+def _find_party(
+    lines: list[_Line], pattern: re.Pattern[str], inline: re.Pattern[str]
+) -> _Party:
     for index, line in enumerate(lines):
         match = pattern.match(line.clean)
-        if not match:
-            continue
-        rest = match.group("rest")
+        if match:
+            rest = match.group("rest")
+        else:
+            inline_match = inline.search(line.clean)
+            if not inline_match:
+                continue
+            rest = inline_match.group("rest")
+        next_field = _NEXT_FIELD_RE.search(rest)
+        if next_field:
+            rest = rest[: next_field.start()]
         if (
             not rest.strip(" .…-–—፦:")
             and index + 1 < len(lines)
             and not _HEADER_FIELD_RE.match(lines[index + 1].clean)
         ):
             rest = lines[index + 1].clean
-        return _clean_party(rest)
-    return ""
+        return _Party(
+            name=_clean_party(rest), labelled=True, none=bool(_NO_PARTY_RE.match(rest))
+        )
+    return _Party(name="", labelled=False, none=False)
+
+
+def _parties_block(block: list[_Line]) -> list[_Line]:
+    """The decision header lines that hold the date and the parties."""
+    parties: list[_Line] = []
+    for line in block[1 : 1 + _CASE_HEADER_FIELD_WINDOW]:
+        if _PARTIES_END_RE.match(line.clean):
+            break
+        is_field = _APPLICANT_RE.match(line.clean) or _RESPONDENT_RE.match(line.clean)
+        if len(line.clean) > _MAX_PARTY_LINE_CHARS and not is_field:
+            break
+        parties.append(line)
+    return parties
 
 
 def _parse_date(lines: list[_Line]) -> str:
@@ -976,10 +1040,19 @@ def _build_case_unit(
     volume: str | None,
     used_ids: dict[str, int],
 ) -> LegalUnit:
-    header_lines = block[1 : 1 + _CASE_HEADER_FIELD_WINDOW]
+    header_lines = _parties_block(block)
     date = _parse_date(header_lines)
-    applicant = _parse_party(header_lines, _APPLICANT_RE)
-    respondent = _parse_party(header_lines, _RESPONDENT_RE)
+    applicant_party = _find_party(header_lines, _APPLICANT_RE, _APPLICANT_INLINE_RE)
+    respondent_party = _find_party(header_lines, _RESPONDENT_RE, _RESPONDENT_INLINE_RE)
+    applicant = applicant_party.name
+    respondent = respondent_party.name
+    # A petition names no respondent: "ተጠሪ፡- የለም", or no ተጠሪ line at all.
+    no_respondent = not respondent and (
+        respondent_party.none
+        or (applicant_party.labelled and not respondent_party.labelled)
+    )
+    last_line = header_lines[-1] if header_lines else block[0]
+    details_lines = last_line.index - block[0].index + 1
 
     display_name = f"ሰበር መ/ቁ {number}"
     if date:
@@ -1013,6 +1086,8 @@ def _build_case_unit(
         metadata=metadata,
         label=f"ሰበር መ/ቁ {number}",
         header_lines=1,
+        details_lines=details_lines,
+        no_respondent=no_respondent,
     )
 
 

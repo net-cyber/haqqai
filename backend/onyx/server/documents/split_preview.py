@@ -253,8 +253,9 @@ def _sequence_issues(
 
 
 def _header_search_lines(unit: LegalUnit) -> int:
-    """Raw lines the splitter searched for decision details: the header line
-    plus CASE_HEADER_SEARCH_LINES non-empty lines after it."""
+    """Raw lines the splitter searched for decision details."""
+    if unit.details_lines:
+        return unit.details_lines
     seen = 0
     lines = _lines(unit)
     for index, line in enumerate(lines):
@@ -284,7 +285,12 @@ def _issues_for(units: list[LegalUnit]) -> dict[str, list[SplitPreviewIssue]]:
         if unit.unit_id in next_missing:
             found.append(next_missing[unit.unit_id])
         if unit.unit_type == LegalUnitType.CASSATION_DECISION:
-            missing = [f for f in _CASE_FIELDS if not unit.metadata.get(f)]
+            missing = [
+                f
+                for f in _CASE_FIELDS
+                if not unit.metadata.get(f)
+                and not (f == "respondent" and unit.no_respondent)
+            ]
             if missing:
                 found.append(
                     MissingFieldsIssue(

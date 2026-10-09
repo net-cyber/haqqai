@@ -252,7 +252,9 @@ def test_full_samples() -> None:
         (SAMPLES / "family.md").read_text(encoding="utf-8"), SplitProfile.AUTO
     )
     assert family.profile == SplitProfile.PROCLAMATION
-    assert len(family.units) == 328
+    # 327 numbered articles, the damaged "ንቀጽ ፵፪" header and the front matter.
+    assert len(family.units) == 329
+    assert "art-42" in _by_id(family.units)
 
     cassation = split_legal_text(
         (SAMPLES / "cassation 15 - 28.md").read_text(encoding="utf-8"),
@@ -288,3 +290,91 @@ def test_heading_starting_with_a_conjunction_syllable_is_kept() -> None:
         u.unit_id: u for u in split_legal_text(text, SplitProfile.PROCLAMATION).units
     }
     assert units["art-2"].heading == "እናት የተቀባዩን አባትነት ስላለማመንዋ"
+
+
+def test_damaged_article_word_and_ethiopic_separators_still_split() -> None:
+    text = "\n".join(
+        [
+            "የሙከራ አዋጅ",
+            "አንቀፅ ፡ ፩ ። ጠቅላላ",
+            "ጽሑፍ።",
+            "አንቀፅ  ፤ ፪ ። ትርጓሜ",
+            "ጽሑፍ።",
+            "ንቀጽ ፫ ወሰን",
+            "ጽሑፍ።",
+            "አንበፅ ፣ ፬ ። ተፈጻሚነት",
+            "ጽሑፍ።",
+            "አአንቀፅ ' ፭ ። የሚጸናበት ጊዜ",
+            "ጽሑፍ።",
+        ]
+    )
+    result = split_legal_text(text, SplitProfile.PROCLAMATION)
+    assert [u.number for u in result.units if u.number] == [1, 2, 3, 4, 5]
+
+
+def _decision(case_number: str, parties: list[str]) -> str:
+    return "\n".join(
+        [
+            f"የሰበር መዝገብ ቁጥር {case_number}",
+            "ጥር 10 ቀን 2010 ዓ.ም",
+            "ዳኞች፡- አቶ ሀ",
+            "አቶ ለ",
+            *parties,
+            "መዝገቡ ተመርምሮ የሚከተለው ፍርድ ተሰጥቷል።",
+            "ፍርድ",
+            "ጉዳዩ የሚመለከተው ...።",
+        ]
+    )
+
+
+@pytest.mark.parametrize(
+    "parties, applicant, respondent, no_respondent",
+    [
+        # The respondent comes after a long list of applicants.
+        (
+            ["አመልካቾች፡- 1ኛ. አቶ ሀ"]
+            + [f"{n}ኛ. አቶ ሰው {n}" for n in range(2, 16)]
+            + ["ተጠሪዎች፡- 1ኛ. አቶ ስብሃቱ ገ/መስቀል"],
+            "አቶ ሀ",
+            "አቶ ስብሃቱ ገ/መስቀል",
+            False,
+        ),
+        # Both parties on one line.
+        (
+            ["አመልካች፡- አቶ ካሳ - ቀርበዋል ተጠሪ፡- ወ/ሮ ታደለች ዳባራ - ቀርበዋል"],
+            "አቶ ካሳ",
+            "ወ/ሮ ታደለች ዳባራ",
+            False,
+        ),
+        # Older volumes: "አመልካቶች", "መልስ ሰጭ", and a glued "ከጠበቃ".
+        (
+            [
+                "አመልካቶች፡- ወ/ሮ ሰሚራ ጀማል ከጠበቃ ሰለሞን ታደሰ ቀረቡ",
+                "መልስ ሰጭ፡- የጎንደር ስጋ ፋብሪካ",
+            ],
+            "ወ/ሮ ሰሚራ ጀማል",
+            "የጎንደር ስጋ ፋብሪካ",
+            False,
+        ),
+        # Petitions name no respondent.
+        (["አመልካች፡- ወ/ት ሞሚና ሡልጣን - ቀረቡ", "ተጠሪ፡- የለም"], "ወ/ት ሞሚና ሡልጣን", "", True),
+        (["አመልካቾች፡- 1. ወ/ሮ አርሴማ ኤልያስ"], "ወ/ሮ አርሴማ ኤልያስ", "", True),
+    ],
+)
+def test_decision_parties(
+    parties: list[str], applicant: str, respondent: str, no_respondent: bool
+) -> None:
+    text = "\n".join(
+        [
+            _decision("123456", parties),
+            _decision("654321", ["አመልካች፡- አቶ ሀ", "ተጠሪ፡- አቶ ለ"]),
+        ]
+    )
+    unit = split_legal_text(text, SplitProfile.CASSATION).units[0]
+    assert unit.unit_id == "case-123456"
+    assert unit.metadata.get("applicant", "") == applicant
+    assert unit.metadata.get("respondent", "") == respondent
+    assert unit.no_respondent is no_respondent
+    # The searched lines end before the judgment.
+    searched = unit.text.split("\n")[: unit.details_lines]
+    assert not any(line.startswith("መዝገቡ") for line in searched)

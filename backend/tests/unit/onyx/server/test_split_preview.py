@@ -48,7 +48,7 @@ PROCLAMATION = """የሙከራ አዋጅ ቁጥር ፩
 
 አንቀጽ ፮ ግዴታዎች
 ማንኛውም ሰው ግዴታ አለበት።
-ንቀጽ ፯ ኃላፊነት
+ቀጽ ፯ ኃላፊነት
 ኃላፊነት በሕግ ይወሰናል።
 
 አንቀጽ ፰ ቅጣት
@@ -125,7 +125,7 @@ def test_missing_number_is_reported_after_the_previous_article() -> None:
             from_text="፯",
             to_text="፯",
             suspect_line=2,
-            suspect_text="ንቀጽ ፯ ኃላፊነት",
+            suspect_text="ቀጽ ፯ ኃላፊነት",
         )
     ]
 
@@ -164,21 +164,28 @@ def test_decisions_report_missing_details_and_shared_court() -> None:
     assert source.court == "የፌዴራል ጠቅላይ ፍርድ ቤት ሰበር ሰሚ ችሎት"
     assert source.law is None
 
-    no_respondent = text.replace(
-        "ተጠሪ- ወ/ሮ የሺ ውድዬ - ረ/ኢንስፔክተር ይመር ዮሴፍ ቀረቡ፡፡", "ተጠሪ- የለም"
-    )
-    assert no_respondent != text
-    units = _units(_preview(no_respondent, SplitProfile.CASSATION))
+    respondent_line = "ተጠሪ- ወ/ሮ የሺ ውድዬ - ረ/ኢንስፔክተር ይመር ዮሴፍ ቀረቡ፡፡"
+    assert respondent_line in text
+
+    # A redacted name is a missing detail.
+    redacted = text.replace(respondent_line, "ተጠሪ- አቶ …………… - ቀረቡ፡፡")
+    units = _units(_preview(redacted, SplitProfile.CASSATION))
     (issue,) = units["case-94952"].issues
     assert isinstance(issue, MissingFieldsIssue)
     assert issue.fields == ["respondent"]
-    # The window is the header line plus up to 15 non-empty lines, blank lines
-    # included, and it never runs past the end of the decision.
-    lines = units["case-94952"].text.split("\n")
-    non_empty = sum(1 for line in lines[: issue.searched_lines] if line.strip())
-    assert 0 < issue.searched_lines <= len(lines)
-    assert non_empty == min(16, sum(1 for line in lines if line.strip()))
     assert units["case-94952"].respondent is None
+    # The window ends before the judgment starts.
+    lines = units["case-94952"].text.split("\n")
+    searched = lines[: issue.searched_lines]
+    assert any(line.startswith("ተጠሪ-") for line in searched)
+    assert not any(line.startswith("መዝገቡ") for line in searched)
+
+    # A petition with no respondent is not a missing detail.
+    for none_line in ("ተጠሪ- የለም", ""):
+        petition = text.replace(respondent_line, none_line)
+        units = _units(_preview(petition, SplitProfile.CASSATION))
+        assert units["case-94952"].issues == []
+        assert units["case-94952"].respondent is None
 
 
 def test_text_budget_sends_excerpts_once_spent() -> None:
@@ -232,7 +239,7 @@ def test_header_position_skips_lines_before_the_heading() -> None:
 
 def test_sub_article_marks_are_not_suspect_headings() -> None:
     # "፯." at the start of a line is a sub-article mark, not article ፯'s heading.
-    text = PROCLAMATION.replace("ንቀጽ ፯ ኃላፊነት", "፯. ኃላፊነት በሕግ ይወሰናል")
+    text = PROCLAMATION.replace("ቀጽ ፯ ኃላፊነት", "፯. ኃላፊነት በሕግ ይወሰናል")
     issue = _units(_preview(text))["art-6"].issues[0]
     assert isinstance(issue, NextMissingIssue)
     assert issue.suspect_line is None
