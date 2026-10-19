@@ -66,6 +66,7 @@ from onyx.file_store.file_store import get_default_file_store
 from onyx.hooks.registry import validate_registry
 from onyx.oauth_provider.config import OAUTH_PROVIDER_SETTINGS
 from onyx.redis.redis_pool import log_redis_server_diagnostics
+from onyx.scovra.seed import seed_scovra_agents
 from onyx.server.api_key.api import router as api_key_router
 from onyx.server.auth.captcha_api import CaptchaCookieMiddleware, LoginCaptchaMiddleware
 from onyx.server.auth.captcha_api import router as captcha_router
@@ -418,6 +419,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # noqa: ARG001
         # If we are multi-tenant, we need to only set up initial public tables
         with get_session_with_current_tenant() as db_session:
             setup_onyx(db_session, POSTGRES_DEFAULT_SCHEMA)
+            # Scovra agents and default agent configuration. Never raises.
+            seed_scovra_agents(db_session)
             # Import a legacy single-config SAML_CONF_DIR into a provider row. The
             # api_server has the mount the migration job lacks, so this is where it
             # runs. No-op unless AUTH_TYPE=saml with no SAML row yet.

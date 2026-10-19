@@ -1,6 +1,7 @@
 # ruff: noqa: E501, W605 start
 
 from onyx.prompts.constants import REMINDER_TAG_NO_HEADER
+from onyx.scovra.prompts import SCOVRA_HOUSE_PREAMBLE
 
 DATETIME_REPLACEMENT_PAT = "{{CURRENT_DATETIME}}"
 CITATION_GUIDANCE_REPLACEMENT_PAT = "{{CITATION_GUIDANCE}}"
@@ -10,7 +11,10 @@ REMINDER_TAG_REPLACEMENT_PAT = "{{REMINDER_TAG_DESCRIPTION}}"
 # Note this uses a string pattern replacement so the user can also include it in their custom prompts. Keeps the replacement logic simple
 # This is editable by the user in the admin UI.
 # The first line is intended to help guide the general feel/behavior of the system.
-DEFAULT_SYSTEM_PROMPT = f"""
+# Scovra: the house preamble comes first, so a reset also restores it.
+DEFAULT_SYSTEM_PROMPT = (
+    SCOVRA_HOUSE_PREAMBLE
+    + f"""
 You are an expert assistant who is truthful, nuanced, insightful, and efficient. \
 Your goal is to deeply understand the user's intent, think step-by-step through complex problems, provide clear and accurate answers, and proactively anticipate helpful follow-up information. \
 Whenever there is any ambiguity around the user's query (or more information would be helpful), you use available tools (if any) to get more context.
@@ -26,6 +30,7 @@ You can use Markdown tables to format your responses for data, lists, and other 
 
 {REMINDER_TAG_REPLACEMENT_PAT}
 """.lstrip()
+)
 
 
 COMPANY_NAME_BLOCK = """
