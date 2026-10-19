@@ -1,97 +1,171 @@
-name: Build and Deploy Haqqai
+name: Build and Deploy Scovra
 
 on:
   push:
     branches:
-      - ft/change
+      - ft/scovra
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One run at a time, so two deploys never change the server together.
+concurrency:
+  group: scovra-deploy
+  cancel-in-progress: false
+
+env:
+  BACKEND_IMAGE: devnatnaels/scovra-backend
+  WEB_IMAGE: devnatnaels/scovra-web
+  # Upstream base release plus a Scovra suffix. The vX.Y.Z-name.N form passes
+  # the version check of the release notes (release_notes/utils.py).
+  SCOVRA_VERSION: v5.0.0-scovra.1
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+  build-backend:
+    name: Build backend image
+    # Native arm64 runner (no QEMU), because the server is arm64.
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@c99871dec2022cc055c062a10cc1a1310835ceb4 # v4.3.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push backend image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: ./backend
           file: ./backend/Dockerfile
-          push: true
-          tags: devnatnaels/haqqai-backend:latest
+          # The shipped stage. The last stage (dev) adds debugging tools.
+          target: runtime
           platforms: linux/arm64
-          cache-from: type=registry,ref=devnatnaels/haqqai-backend:cache
-          cache-to: type=registry,ref=devnatnaels/haqqai-backend:cache,mode=max
+          push: true
+          tags: |
+            ${{ env.BACKEND_IMAGE }}:latest
+            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          build-args: |
+            ONYX_VERSION=${{ env.SCOVRA_VERSION }}
+          cache-from: type=registry,ref=${{ env.BACKEND_IMAGE }}:cache
+          cache-to: type=registry,ref=${{ env.BACKEND_IMAGE }}:cache,mode=max
 
-      - name: Build and push frontend image
-        uses: docker/build-push-action@v5
+  build-web:
+    name: Build web image
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@c99871dec2022cc055c062a10cc1a1310835ceb4 # v4.3.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Same build args as the upstream self-hosted web image, without the
+      # hardened (DHI) base images, which need a Docker Hub DHI subscription.
+      - name: Build and push web image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: ./web
           file: ./web/Dockerfile
-          push: true
-          tags: devnatnaels/haqqai-web:latest
           platforms: linux/arm64
-          cache-from: type=registry,ref=devnatnaels/haqqai-web:cache
-          cache-to: type=registry,ref=devnatnaels/haqqai-web:cache,mode=max
+          push: true
+          tags: |
+            ${{ env.WEB_IMAGE }}:latest
+            ${{ env.WEB_IMAGE }}:${{ github.sha }}
+          build-args: |
+            ONYX_VERSION=${{ env.SCOVRA_VERSION }}
+            NODE_OPTIONS=--max-old-space-size=8192
+          cache-from: type=registry,ref=${{ env.WEB_IMAGE }}:cache
+          cache-to: type=registry,ref=${{ env.WEB_IMAGE }}:cache,mode=max
 
   deploy:
-    needs: build-and-push
+    name: Deploy to server
+    needs:
+      - build-backend
+      - build-web
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
+      # .env and .env.nginx are not in git, so this copy never changes them.
       - name: Copy deployment files to server
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
         with:
           host: ${{ secrets.ORACLE_HOST }}
           username: ${{ secrets.ORACLE_USER }}
           key: ${{ secrets.ORACLE_SSH_KEY }}
-          source: "deployment/"
-          target: "/home/ubuntu/haqqai"
+          source: "deployment/docker_compose/,deployment/data/"
+          target: "/home/ubuntu/scovra"
 
-      - name: Deploy on Oracle server
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Deploy on server
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
         with:
           host: ${{ secrets.ORACLE_HOST }}
           username: ${{ secrets.ORACLE_USER }}
           key: ${{ secrets.ORACLE_SSH_KEY }}
+          # The first deploy pulls several GB of images.
+          command_timeout: 55m
           script: |
-            # Fail the job if any command fails
-            set -e
+            set -euo pipefail
 
-            # Fix permissions
-            sudo chown -R ubuntu:ubuntu /home/ubuntu/haqqai/
+            cd /home/ubuntu/scovra/deployment/docker_compose
 
-            cd /home/ubuntu/haqqai/deployment/docker_compose
+            # The server keeps its own secrets. Never make them from a template.
+            for f in .env .env.nginx; do
+              if [ ! -f "$f" ]; then
+                echo "ERROR: $PWD/$f is missing. Create it as SCOVRA_DEPLOY.md tells (start from env.scovra.template). Deploy stopped." >&2
+                exit 1
+              fi
+            done
 
-            # Create .env if it doesn't exist
-            if [ ! -f .env ]; then
-              cp env.template .env 2>/dev/null || touch .env
+            # Compose does not check these two. The stack does not start without them.
+            for key in USER_AUTH_SECRET POSTGRES_PASSWORD; do
+              if ! grep -Eq "^${key}=[\"']?[^\"'[:space:]]" .env; then
+                echo "ERROR: ${key} is empty or missing in $PWD/.env. Deploy stopped." >&2
+                exit 1
+              fi
+            done
+
+            # docker-compose.craft.yml uses these as external resources.
+            if ! docker network inspect onyx_craft_sandbox >/dev/null 2>&1 \
+              || ! docker volume inspect sandbox_proxy_ca >/dev/null 2>&1; then
+              echo "ERROR: Docker network onyx_craft_sandbox or volume sandbox_proxy_ca is missing. Do the one-time server prep in SCOVRA_DEPLOY.md. Deploy stopped." >&2
+              exit 1
             fi
 
-            # Fix web_server health check dependency for nginx
-            sed -i 's/condition: service_healthy$/condition: service_started/' docker-compose.prod.yml
+            chmod +x /home/ubuntu/scovra/deployment/data/nginx/run-nginx.sh
 
-            # Ensure nginx config files are executable
-            chmod +x /home/ubuntu/haqqai/deployment/data/nginx/run-nginx.sh
+            dc() {
+              docker compose -p scovra \
+                -f docker-compose.prod.yml \
+                -f docker-compose.craft.yml \
+                -f docker-compose.scovra.yml "$@"
+            }
 
-            # Pull latest images
-            docker compose -f docker-compose.prod.yml pull
-
-            # Restart with new images
-            docker compose -f docker-compose.prod.yml up -d --force-recreate
-
-            # Clean up old images
+            # Stops here if .env does not set a value that Compose requires (the S3 keys).
+            dc config --quiet
+            dc pull
+            dc up -d --force-recreate --remove-orphans
             docker image prune -f

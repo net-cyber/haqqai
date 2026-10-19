@@ -1,0 +1,18 @@
+# Scovra overlay. It is not generated, so edit it here. Apply it last:
+#
+#   docker compose -p scovra -f docker-compose.prod.yml \
+#     -f docker-compose.craft.yml -f docker-compose.scovra.yml up -d
+#
+# See SCOVRA_DEPLOY.md.
+services:
+  nginx:
+    volumes:
+      # Certificates come from certbot on the host. This mount has the same
+      # target as the ../data/certbot/conf mount in docker-compose.prod.yml,
+      # so it replaces that mount.
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+
+  # The host certbot renews the certificates, so this service does not start.
+  certbot:
+    deploy:
+      replicas: 0
