@@ -531,11 +531,11 @@ def log_http_error(request: Request, exc: Exception) -> JSONResponse:
 
 def get_application(lifespan_override: Lifespan | None = None) -> FastAPI:
     application = FastAPI(
-        title="Onyx Backend",
+        title="Scovra Backend",
         version=__version__,
-        description="Onyx API for AI-powered chat with search, document indexing, agents, actions, and more",
+        description="Scovra API for nonprofit funding and reporting: AI-powered chat with search, document indexing, agents, actions, and more",
         servers=[
-            {"url": f"{WEB_DOMAIN.rstrip('/')}/api", "description": "Onyx API Server"}
+            {"url": f"{WEB_DOMAIN.rstrip('/')}/api", "description": "Scovra API Server"}
         ],
         # The interactive docs and schema are opt-in (see ENABLE_PUBLIC_DOCS).
         # When disabled, these routes are not registered at all (404), so the
