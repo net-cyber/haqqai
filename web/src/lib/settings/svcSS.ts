@@ -5,7 +5,11 @@ import {
   Settings,
   QueryHistoryType,
 } from "@/lib/settings/types";
-import { CUSTOM_ANALYTICS_ENABLED, HOST_URL } from "@/lib/constants";
+import {
+  CUSTOM_ANALYTICS_ENABLED,
+  DEFAULT_APP_NAME,
+  HOST_URL,
+} from "@/lib/constants";
 import { fetchSS } from "@/lib/utilsSS";
 import { DEFAULT_LOCALE } from "@/i18n/config";
 import { getWebVersion } from "@/lib/version";
@@ -129,7 +133,7 @@ export async function fetchSettingsSS(): Promise<CombinedSettings | null> {
       customAnalyticsScript,
       webVersion: settings.version ?? getWebVersion(),
       webDomain: HOST_URL,
-      appName: enterpriseSettings?.application_name?.trim() || "Onyx",
+      appName: enterpriseSettings?.application_name?.trim() || DEFAULT_APP_NAME,
     };
   } catch (error) {
     console.error("fetchSettingsSS exception: ", error);

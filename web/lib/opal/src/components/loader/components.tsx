@@ -46,13 +46,14 @@ interface OnyxLoaderProps {
   color?: LoaderColor;
 }
 
-// Geometry matches the @opal/icons `onyx-octagon`/`onyx-logo` paths. Stroke
-// is defined here, not reused from them, so weight can be tuned: ~2.5px at
-// the default 64px, scaling with `size`.
+// Geometry matches the Scovra compass mark in @opal/logos (ring and needle),
+// scaled to a 16px box. Stroke is defined here so weight can be tuned: ~2.5px
+// at the default 64px, scaling with `size`.
 const STROKE_WIDTH = 0.625;
 
-const OUTLINE_PATH =
-  "M4.5 2.50002L8 1.00002L11.5 2.50002M13.5 4.50002L15 8.00001L13.5 11.5M11.5 13.5L8 15L4.5 13.5M2.5 11.5L1 8L2.5 4.50002";
+const RING_PATH = "M1.5 8A6.5 6.5 0 1 1 14.5 8A6.5 6.5 0 1 1 1.5 8Z";
+
+const OUTLINE_PATH = RING_PATH;
 
 function svgLayerProps(size: number) {
   return {
@@ -66,15 +67,14 @@ function svgLayerProps(size: number) {
 }
 
 const MARK_PATHS = [
-  "M8 4.00001L4.5 2.50002L8 1.00002L11.5 2.50002L8 4.00001Z",
-  "M8 12L11.5 13.5L8 15L4.5 13.5L8 12Z",
-  "M4 8L2.5 11.5L1 8L2.5 4.50002L4 8Z",
-  "M12 8.00002L13.5 4.50002L15 8.00001L13.5 11.5L12 8.00002Z",
+  RING_PATH,
+  "M11.5 4.5L9.15 9.15L6.85 6.85Z",
+  "M4.5 11.5L6.85 6.85L9.15 9.15Z",
 ];
 
 /**
- * Onyx-branded loading mark: rotates a full turn while crossfading between the
- * octagon outline and the diamond logo (2s loop), holding the static outline
+ * Branded loading mark: rotates a full turn while crossfading between the
+ * compass ring and the ring with its needle (2s loop), holding the static ring
  * under `prefers-reduced-motion`. Uses `currentColor`, so `color` themes it.
  * For a full-page loading state with a label, use `PageLoader`.
  */

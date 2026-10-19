@@ -7,6 +7,7 @@ import AgentAvatar from "@/refresh-components/avatars/AgentAvatar";
 import { Button } from "@opal/components";
 import { usePinnedAgents } from "@/lib/agents/hooks";
 import { noProp } from "@/lib/utils";
+import { DEFAULT_APP_NAME } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { can } from "@/lib/permissions/resource-actions";
 import { useTierAtLeast } from "@/lib/tiers/hooks";
@@ -141,7 +142,7 @@ export default function AgentCard({ agent, onView }: AgentCardProps) {
               <div className="flex flex-col gap-1 py-1 px-2">
                 <Content
                   icon={SvgUser}
-                  title={agent.owner?.email || "Onyx"}
+                  title={agent.owner?.email || DEFAULT_APP_NAME}
                   sizePreset="secondary"
                   variant="body"
                   color="muted"

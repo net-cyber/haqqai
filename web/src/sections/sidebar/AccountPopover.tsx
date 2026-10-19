@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { LOGOUT_DISABLED } from "@/lib/constants";
+import { DEFAULT_APP_NAME, LOGOUT_DISABLED } from "@/lib/constants";
 import { preload } from "swr";
 import { errorHandlingFetcher } from "@/lib/fetcher";
 import {
@@ -40,7 +40,6 @@ import UserAvatar from "@/refresh-components/avatars/UserAvatar";
 import SidebarTabSkeleton from "@/refresh-components/skeletons/SidebarTabSkeleton";
 import { useNotificationSummary } from "@/hooks/useNotifications";
 import { SvgOnyxLogo } from "@opal/logos";
-import { markdown } from "@opal/utils";
 import { useTranslations } from "next-intl";
 
 interface SettingsItemsProps {
@@ -204,11 +203,7 @@ function useSettingsItems({
                 color="muted"
                 orientation="reverse"
                 icon={SvgOnyxLogo}
-                title={markdown(
-                  `[Onyx ${
-                    settings.version ?? "dev"
-                  }](https://docs.onyx.app/changelog)`
-                )}
+                title={`${DEFAULT_APP_NAME} ${settings.version ?? "dev"}`}
               />
             </div>
           ),

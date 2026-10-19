@@ -4,7 +4,7 @@ import { useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useAppPosition } from "@/lib/position/hooks";
 import { useSettings } from "@/lib/settings/hooks";
-import { APP_SLOGAN } from "@/lib/constants";
+import { APP_SLOGAN, DEFAULT_APP_NAME } from "@/lib/constants";
 import useChatSessions from "@/hooks/useChatSessions";
 import { useCurrentSessionPersonaId } from "@/app/app/stores/useChatSessionStore";
 import { useActiveAgent, useAgents } from "@/lib/agents/hooks";
@@ -14,7 +14,7 @@ export function useCustomFooterContent(): string {
   const settings = useSettings();
   return (
     settings.enterprise?.custom_lower_disclaimer_content ||
-    `[Onyx ${settings.version ?? "dev"}](https://www.onyx.app/) - ${APP_SLOGAN}`
+    `${DEFAULT_APP_NAME} ${settings.version ?? "dev"} - ${APP_SLOGAN}`
   );
 }
 

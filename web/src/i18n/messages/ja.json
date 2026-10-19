@@ -11693,7 +11693,7 @@
         "title": "{appName} へようこそ"
       },
       "welcomeSubtitle": {
-        "text": "仕事のためのオープンソース AI プラットフォーム"
+        "text": "機会を見つけ出し、その後のフォローまで担います。"
       },
       "workEmailField": {
         "label": "職場のメールアドレス"
@@ -13503,7 +13503,7 @@
     },
     "welcome": {
       "greeting": {
-        "helpText": "何かお手伝いできることはありますか？",
+        "helpText": "今日は何を調査、作成、報告しましょうか？",
         "startText": "始めましょう。"
       },
       "incognito": {

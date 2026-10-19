@@ -11693,7 +11693,7 @@
         "title": "Willkommen bei {appName}"
       },
       "welcomeSubtitle": {
-        "text": "Ihre Open-Source-KI-Plattform für die Arbeit"
+        "text": "Wir spüren Chancen auf. Wir kümmern uns um die Umsetzung."
       },
       "workEmailField": {
         "label": "Geschäftliche E-Mail"
@@ -13503,7 +13503,7 @@
     },
     "welcome": {
       "greeting": {
-        "helpText": "Wie kann ich helfen?",
+        "helpText": "Was steht heute an: Recherche, Entwurf oder Bericht?",
         "startText": "Legen wir los."
       },
       "incognito": {

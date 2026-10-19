@@ -11693,7 +11693,7 @@
         "title": "欢迎使用 {appName}"
       },
       "welcomeSubtitle": {
-        "text": "面向工作的开源 AI 平台"
+        "text": "我们发掘机会，也负责后续跟进。"
       },
       "workEmailField": {
         "label": "工作邮箱"
@@ -13503,7 +13503,7 @@
     },
     "welcome": {
       "greeting": {
-        "helpText": "有什么可以帮您？",
+        "helpText": "今天我们要发掘、起草还是汇报什么？",
         "startText": "开始吧。"
       },
       "incognito": {

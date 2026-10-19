@@ -115,6 +115,9 @@ export const DEFAULT_LOGO_SIZE_PX = 24;
 export const DEFAULT_CONTEXT_TOKENS = 120_000;
 export const MAX_CHUNKS_FED_TO_CHAT = 25;
 
-export const APP_SLOGAN = "Open Source AI Platform";
+/** Product name shown when no custom application name is set. */
+export const DEFAULT_APP_NAME = "Scovra";
+export const APP_SLOGAN =
+  "The AI operating system for nonprofit funding and reporting";
 
 export const DEFAULT_PAGE_SIZE = 10;

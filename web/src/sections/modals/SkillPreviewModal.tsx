@@ -10,6 +10,7 @@ import { Modal } from "@opal/components";
 import { Section } from "@/layouts/general-layouts";
 import { errorHandlingFetcher } from "@/lib/fetcher";
 import { SWR_KEYS } from "@/lib/swr-keys";
+import { DEFAULT_APP_NAME } from "@/lib/constants";
 import type { SkillPreview } from "@/lib/skills/types";
 import InstructionsDisplayModeToggle, {
   type InstructionsDisplayMode,
@@ -37,7 +38,10 @@ interface MetadataRow {
 function metadataRows(preview: SkillPreview): MetadataRow[] {
   const rows: MetadataRow[] = [];
   if (preview.source === "builtin") {
-    rows.push({ labelKey: "preview.metadata.createdBy.label", value: "Onyx" });
+    rows.push({
+      labelKey: "preview.metadata.createdBy.label",
+      value: DEFAULT_APP_NAME,
+    });
   } else if (preview.author_email) {
     rows.push({
       labelKey: "preview.metadata.createdBy.label",

@@ -1,4 +1,5 @@
 import type { IconProps } from "@opal/types";
+// Scovra mark: a compass ring with a needle that points north-east.
 const SvgOnyxLogo = ({ size, ...props }: IconProps) => (
   <svg
     height={size}
@@ -8,20 +9,16 @@ const SvgOnyxLogo = ({ size, ...props }: IconProps) => (
     {...props}
   >
     <path
-      d="M10.4014 13.25L18.875 32L10.3852 50.75L2 32L10.4014 13.25Z"
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M3 32A29 29 0 1 0 61 32A29 29 0 1 0 3 32ZM9 32A23 23 0 1 0 55 32A23 23 0 1 0 9 32Z"
       fill="var(--theme-primary-05)"
     />
+    <path d="M46 18L36.6 36.6L27.4 27.4Z" fill="var(--theme-primary-05)" />
     <path
-      d="M53.5264 13.25L62 32L53.5102 50.75L45.125 32L53.5264 13.25Z"
+      d="M18 46L27.4 27.4L36.6 36.6Z"
       fill="var(--theme-primary-05)"
-    />
-    <path
-      d="M32 45.125L50.75 53.5625L32 62L13.25 53.5625L32 45.125Z"
-      fill="var(--theme-primary-05)"
-    />
-    <path
-      d="M32 2L50.75 10.4375L32 18.875L13.25 10.4375L32 2Z"
-      fill="var(--theme-primary-05)"
+      fillOpacity={0.45}
     />
   </svg>
 );

@@ -11693,7 +11693,7 @@
         "title": "Boas-vindas ao {appName}"
       },
       "welcomeSubtitle": {
-        "text": "Sua plataforma de IA de código aberto para o trabalho"
+        "text": "Encontramos as oportunidades. Cuidamos do acompanhamento."
       },
       "workEmailField": {
         "label": "E-mail de trabalho"
@@ -13503,7 +13503,7 @@
     },
     "welcome": {
       "greeting": {
-        "helpText": "Como posso ajudar?",
+        "helpText": "O que vamos pesquisar, redigir ou relatar hoje?",
         "startText": "Vamos começar."
       },
       "incognito": {

@@ -7,9 +7,9 @@ interface OnyxLogoTypedProps {
   className?: string;
 }
 
-// # NOTE(@raunakab):
-// This ratio is not some random, magical number; it is available on Figma.
-const HEIGHT_TO_GAP_RATIO = 5 / 16;
+// The Scovra mark and wordmark have more side bearing than the Onyx art, so a
+// 1/4 ratio keeps the visible gap of the original 5/16 Figma lockup.
+const HEIGHT_TO_GAP_RATIO = 1 / 4;
 
 const SvgOnyxLogoTyped = ({ size: height, className }: OnyxLogoTypedProps) => {
   const gap = height != null ? height * HEIGHT_TO_GAP_RATIO : undefined;

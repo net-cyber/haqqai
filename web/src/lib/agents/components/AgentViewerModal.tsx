@@ -39,6 +39,7 @@ import { getDisplayName } from "@/lib/languageModels/utils";
 import { useLanguageModelsForAgent } from "@/lib/languageModels/hooks";
 import { Interactive } from "@opal/core";
 import { useSettings } from "@/lib/settings/hooks";
+import { DEFAULT_APP_NAME } from "@/lib/constants";
 
 /**
  * Read-only MCP Server card for the viewer modal.
@@ -281,7 +282,7 @@ export function AgentViewerModal({ agent, onClose }: AgentViewerModalProps) {
             )}
             <Content
               icon={SvgUser}
-              title={agent.owner?.email ?? "Onyx"}
+              title={agent.owner?.email ?? DEFAULT_APP_NAME}
               sizePreset="main-ui"
               variant="body"
               color="muted"

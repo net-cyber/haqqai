@@ -29,6 +29,7 @@ import {
 import type { MCPOAuthDiscovery } from "@/lib/mcp/types";
 import type { MCPOAuthFailureReason } from "@/lib/mcp/svc";
 import messages from "@/i18n/messages/en.json";
+import { DEFAULT_APP_NAME } from "@/lib/constants";
 
 const copy = messages.actions.mcpAuthModal;
 const server: MCPServer = {
@@ -795,7 +796,9 @@ test("each authentication method shows its explanation in the main form", async 
     screen.getByRole("combobox", { name: copy.authType.label })
   ).toHaveValue(copy.authType.oauth.label);
   expect(
-    screen.getByText(copy.oauthInfo.discovery.replaceAll("{appName}", "Onyx"))
+    screen.getByText(
+      copy.oauthInfo.discovery.replaceAll("{appName}", DEFAULT_APP_NAME)
+    )
   ).toBeVisible();
   await user.click(screen.getByRole("combobox", { name: copy.authType.label }));
   await user.click(
@@ -813,7 +816,10 @@ test("each authentication method shows its explanation in the main form", async 
   );
   expect(
     screen.getByText(
-      copy.passThroughNotice.description.replaceAll("{appName}", "Onyx")
+      copy.passThroughNotice.description.replaceAll(
+        "{appName}",
+        DEFAULT_APP_NAME
+      )
     )
   ).toBeVisible();
 });

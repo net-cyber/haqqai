@@ -11693,7 +11693,7 @@
         "title": "{appName}에 오신 것을 환영합니다"
       },
       "welcomeSubtitle": {
-        "text": "업무를 위한 오픈 소스 AI 플랫폼"
+        "text": "기회를 찾아내고, 후속 작업까지 책임집니다."
       },
       "workEmailField": {
         "label": "회사 이메일"
@@ -13503,7 +13503,7 @@
     },
     "welcome": {
       "greeting": {
-        "helpText": "무엇을 도와드릴까요?",
+        "helpText": "오늘은 무엇을 찾고, 작성하고, 보고할까요?",
         "startText": "시작해 볼까요."
       },
       "incognito": {
